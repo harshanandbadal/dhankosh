@@ -27,15 +27,46 @@ app.use(express.static(path.join(__dirname, '..')));
 
 // ─── MONGODB CONNECTION ───────────────────────────────────
 
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('[ SYSTEM ACTIVE : DATABASE CONNECTED ]'))
-  .catch(err => {
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb) {
+    return cachedDb;
+  }
+
+  if (!process.env.MONGODB_URI) {
+    console.error('[ SYSTEM ERROR ] MONGODB_URI environment variable is missing.');
+    throw new Error('Database connection string is missing.');
+  }
+
+  try {
+    const db = await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('[ SYSTEM ACTIVE : DATABASE CONNECTED ]');
+    cachedDb = db;
+    return db;
+  } catch (err) {
     console.error('[ SYSTEM WARNING : DATABASE CONNECTION FAILED ]');
     console.error('  Error:', err.message);
-    console.error('  If using MongoDB Atlas, ensure your IP is whitelisted:');
-    console.error('  https://www.mongodb.com/docs/atlas/security-whitelist/');
-    console.error('  The server will keep running — Mongoose will auto-reconnect.');
-  });
+    throw err;
+  }
+}
+
+// Global middleware to ensure database connection before API requests
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    try {
+      await connectToDatabase();
+      next();
+    } catch (error) {
+      return res.status(500).json({ error: 'Database connection failed. Check Vercel Environment Variables.' });
+    }
+  } else {
+    next();
+  }
+});
 
 // ─── MODELS ───────────────────────────────────────────────
 
