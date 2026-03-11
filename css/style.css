@@ -52,29 +52,16 @@
 
 /* --- Body & Background Environment --- */
 body {
-    background: linear-gradient(-45deg, var(--bg-base), #121826, #0A0D14, #051A2E);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+    background: radial-gradient(ellipse at 20% 50%, rgba(0, 100, 150, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(5, 26, 46, 0.4) 0%, transparent 50%),
+                linear-gradient(135deg, #06070A 0%, #0D1017 25%, #0A0D14 75%, #051A2E 100%);
+    background-attachment: fixed;
     color: var(--text-main);
     font-family: var(--font-mono);
     min-height: 100vh;
     padding: 2rem;
     position: relative;
     overflow-x: hidden;
-}
-
-@keyframes gradientBG {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
 }
 
 /* Animated CRT Scanline Overlay */
