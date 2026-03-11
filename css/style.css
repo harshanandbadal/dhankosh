@@ -537,7 +537,7 @@ h3 {
 /* --- Layout --- */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
     gap: 2rem;
     position: relative;
     z-index: 10;
@@ -547,6 +547,7 @@ h3 {
     grid-column: 1 / -1;
     display: flex;
     justify-content: center;
+    width: 100%;
 }
 
 .balance-wrapper .panel {
@@ -2612,8 +2613,12 @@ select.txn-input option {
     }
 
     .dashboard-grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
         gap: 1.5rem;
+    }
+
+    .balance-wrapper .panel {
+        max-width: 100%;
     }
 
     .quick-action-bar {
@@ -2712,8 +2717,13 @@ select.txn-input option {
         grid-column: 1;
     }
 
+    .balance-wrapper {
+        width: 100%;
+    }
+
     .balance-wrapper .panel {
         max-width: 100%;
+        width: 100%;
     }
 
     /* Panel adjustments */
@@ -2838,6 +2848,21 @@ select.txn-input option {
 
     .header-logo {
         height: 28px;
+    }
+
+    /* Dashboard grid — ensure single column and full width */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .balance-wrapper {
+        width: 100%;
+    }
+
+    .balance-wrapper .panel {
+        max-width: 100%;
+        width: 100%;
     }
 
     /* Quick actions — single column */
