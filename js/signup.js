@@ -6,7 +6,7 @@
 'use strict';
 
 // Check if already logged in and redirect to dashboard
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const token = localStorage.getItem('authToken');
     if (token && token.startsWith('eyJ')) {
         window.location.href = 'dashboard.html';
@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Handle signup form submission
-document.getElementById('signupForm').addEventListener('submit', async function(e) {
+document.getElementById('signupForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    
+
     const fullname = document.getElementById('fullname').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -81,7 +81,7 @@ document.getElementById('signupForm').addEventListener('submit', async function(
 
         if (!response.ok) {
             messageEl.className = 'form-message error';
-            messageEl.textContent = data.error || 'Registration failed';
+            messageEl.textContent = data.details ? `${data.error} Details: ${data.details}` : (data.error || 'Registration failed');
             messageEl.style.display = 'block';
             submitBtn.disabled = false;
             submitBtn.textContent = 'Register Account';
