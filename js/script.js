@@ -31,33 +31,15 @@ const ACCOUNT_LABELS = {
 
 // Budget system is now fully dynamic — no hardcoded limits or labels
 
-// ─── PARTICLE BACKGROUND ──────────────────────────────────
+// ─── PARTICLE BACKGROUND (DISABLED) ────────────────────────────────────
 
 function initializeParticles() {
-  const container = document.getElementById('particlesContainer');
-  if (!container) return;
-
-  const particleCount = 50;
-  const animations = ['particleFloat', 'particleFloat2', 'particleFloat3'];
-
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-
-    const size = Math.random() * 4 + 2; // 2-6px
-    const left = Math.random() * 100;
-    const delay = Math.random() * 20;
-    const duration = Math.random() * 15 + 15; // 15-30s
-    const animation = animations[Math.floor(Math.random() * animations.length)];
-
-    particle.style.width = size + 'px';
-    particle.style.height = size + 'px';
-    particle.style.left = left + '%';
-    particle.style.bottom = '-10px';
-    particle.style.animation = `${animation} ${duration}s linear ${delay}s infinite`;
-
-    container.appendChild(particle);
-  }
+  // Particles disabled for smoother performance and cleaner interface
+  // const container = document.getElementById('particlesContainer');
+  // if (!container) return;
+  // const particleCount = 50;
+  // const animations = ['particleFloat', 'particleFloat2', 'particleFloat3'];
+  // for (let i = 0; i < particleCount; i++) { ... }
 }
 
 // ─── STATE ────────────────────────────────────────────────
@@ -1936,7 +1918,7 @@ function updateSystemStatus() {
 document.addEventListener('DOMContentLoaded', async () => {
   if (!checkAuth()) return;
 
-  initializeParticles();
+  // initializeParticles(); // Disabled for smoother, cleaner interface
   renderUserInfo();
 
   // Render with local cache first (instant)
