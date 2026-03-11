@@ -61,7 +61,11 @@ app.use(async (req, res, next) => {
       await connectToDatabase();
       next();
     } catch (error) {
-      return res.status(500).json({ error: 'Database connection failed. Check Vercel Environment Variables.' });
+      console.error('[ DATABASE CONNECT ERROR ]', error);
+      return res.status(500).json({
+        error: 'Database connection failed.',
+        details: error.message || String(error)
+      });
     }
   } else {
     next();
