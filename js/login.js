@@ -6,7 +6,7 @@
 'use strict';
 
 // Check for newly registered user details and pre-fill email
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const newUserEmail = localStorage.getItem('newUserEmail');
     if (newUserEmail) {
         document.getElementById('email').value = newUserEmail;
@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Handle login form submission
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const messageEl = document.getElementById('loginMessage');
@@ -79,7 +79,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
         if (!response.ok) {
             messageEl.className = 'form-message error';
-            messageEl.textContent = data.error || 'Login failed';
+            messageEl.textContent = data.details ? `${data.error} Details: ${data.details}` : (data.error || 'Login failed');
             messageEl.style.display = 'block';
             submitBtn.disabled = false;
             submitBtn.textContent = 'Authenticate';
