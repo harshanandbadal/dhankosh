@@ -174,7 +174,7 @@ app.post('/api/auth/register', async (req, res) => {
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Email already registered' });
     }
-    res.status(500).json({ error: 'Server error during registration' });
+    res.status(500).json({ error: 'Server error during registration', details: err.message || String(err) });
   }
 });
 
@@ -212,7 +212,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   } catch (err) {
     console.error('Login error:', err.message);
-    res.status(500).json({ error: 'Server error during login' });
+    res.status(500).json({ error: 'Server error during login', details: err.message || String(err) });
   }
 });
 
