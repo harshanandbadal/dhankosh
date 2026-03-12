@@ -2243,6 +2243,7 @@ select.txn-input option {
     font-family: var(--font-mono);
     overflow: hidden;
     text-overflow: ellipsis;
+    /* On desktop we keep it nowrap for the table look, but on mobile we will override this */
     white-space: nowrap;
 }
 
@@ -2293,41 +2294,8 @@ select.txn-input option {
 }
 
 /* --- Responsive Adjustments --- */
-@media (max-width: 768px) {
-    body {
-        padding: 1rem;
-    }
-
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .header h1 {
-        font-size: 2.5rem;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-container {
-        max-width: 100%;
-    }
-
-    .transactions-header,
-    .transaction-row {
-        grid-template-columns: 80px 100px 1fr 80px;
-        font-size: 0.75rem;
-    }
-
-    .txn-col-account,
-    .txn-data-account {
-        display: none;
-    }
-}
+    /* Removed redundant/conflicting media query block at line 2296 
+       as it is covered by the consolidated responsive section below. */
 
 /* This ensures the panel spans the entire width of the grid */
 .full-width-panel {
@@ -2773,21 +2741,38 @@ select.txn-input option {
         font-size: 0.85rem;
     }
 
-    /* Transaction History — horizontal scroll table */
+    /* Transaction History — responsive table/list */
     .transactions-wrapper {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .transactions-header,
     .transactions-list {
-        min-width: 700px;
+        /* Remove hardcoded min-width that forces zooming out */
+        min-width: 100%;
     }
 
+    .transactions-header,
     .transaction-row {
-        grid-template-columns: repeat(7, minmax(70px, 1fr));
+        /* Adjusted grid for mobile: 
+           Date, ID (hidden), Type, Amount, Purpose (flexible), Account (hidden), Action */
+        display: grid;
+        grid-template-columns: 85px 75px 85px 1fr 80px;
         font-size: 0.75rem;
         gap: 0.4rem;
         padding: 0.6rem;
+    }
+
+    .txn-col-id, .txn-data-id,
+    .txn-col-account, .txn-data-account {
+        display: none;
+    }
+
+    .txn-data-purpose {
+        white-space: normal; /* Allow purpose to wrap on mobile */
+        word-break: break-word;
+        padding-right: 0.5rem;
     }
 
     .txn-delete-btn {
