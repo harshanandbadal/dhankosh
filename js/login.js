@@ -1,110 +1,146 @@
 /* =========================================================
-   LOGIN PAGE SCRIPT
-   Handles login form submission and authentication
+   DHANKOSH TERMINAL — print.js
+   Logic to load local state and populate the print template
    ========================================================= */
 
 'use strict';
 
-// Check for newly registered user details and pre-fill email
-document.addEventListener('DOMContentLoaded', function () {
-    const newUserEmail = localStorage.getItem('newUserEmail');
-    if (newUserEmail) {
-        document.getElementById('email').value = newUserEmail;
-        localStorage.removeItem('newUserEmail');
-        localStorage.removeItem('newUsername');
+function loadState() {
+  try {
+    const raw = localStorage.getItem('dhankosh_state');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    return null;
+  }
+}
 
-        // Show success message from signup
-        const messageEl = document.getElementById('loginMessage');
-        messageEl.className = 'form-message success';
-        messageEl.textContent = 'Account created! Please login.';
-        messageEl.style.display = 'block';
+function formatINR(amount) {
+  const abs = Math.abs(amount);
+  const formatted = abs.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return '₹ ' + formatted;
+}
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return '—';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const state = loadState();
+  const username = localStorage.getItem('username') || 'Authorized User';
+
+  document.getElementById('printUsername').textContent = username;
+  document.getElementById('printDate').textContent = new Date().toLocaleString('en-IN');
+
+  const setupOverlay = document.getElementById('setupOverlay');
+  const statementContent = document.getElementById('statementContent');
+  const accountSelect = document.getElementById('accountSelect');
+  const paymentDetailsSelect = document.getElementById('paymentDetailsSelect');
+  const setupForm = document.getElementById('setupForm');
+  const tbody = document.getElementById('printTableBody');
+  const filterText = document.getElementById('statementAccountFilter');
+
+  if (!state || !state.transactions || state.transactions.length === 0) {
+    setupOverlay.style.display = 'none';
+    statementContent.style.display = 'block';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">[ NO TRANSACTIONS FOUND IN LEDGER ]</td></tr>';
+    return;
+  }
+
+  // Populate Accounts Dropdown dynamically
+  const uniqueAccounts = [...new Set(state.transactions.map(t => t.account).filter(a => a))].sort();
+  uniqueAccounts.forEach(acc => {
+    const opt = document.createElement('option');
+    opt.value = acc;
+    opt.textContent = acc;
+    accountSelect.appendChild(opt);
+  });
+
+  // Populate Payment Details Dropdown dynamically
+  const uniquePaymentDetails = [...new Set(state.transactions.map(t => t.purpose).filter(p => p))].sort();
+  uniquePaymentDetails.forEach(purpose => {
+    const opt = document.createElement('option');
+    opt.value = purpose;
+    opt.textContent = purpose;
+    if (paymentDetailsSelect) {
+      paymentDetailsSelect.appendChild(opt);
     }
+  });
 
-    // If already logged in, redirect to dashboard
-    const token = localStorage.getItem('authToken');
-    if (token && token.startsWith('eyJ')) {
-        window.location.href = 'dashboard.html';
-    }
-});
+  // Force show setup overlay initially
+  setupOverlay.style.setProperty('display', 'flex', 'important');
+  statementContent.style.setProperty('display', 'none', 'important');
 
-// Handle login form submission
-document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  // Handle form submission
+  setupForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    const selectedAccount = accountSelect.value;
+    const selectedPaymentDetails = paymentDetailsSelect ? paymentDetailsSelect.value : 'ALL';
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const messageEl = document.getElementById('loginMessage');
-    const submitBtn = this.querySelector('button[type="submit"]');
+    // Switch views
+    setupOverlay.style.setProperty('display', 'none', 'important');
+    statementContent.style.setProperty('display', 'block', 'important');
 
-    // Basic client-side validation
-    if (!email || !password) {
-        messageEl.className = 'form-message error';
-        messageEl.textContent = 'All fields are required';
-        messageEl.style.display = 'block';
-        return;
+    const accountText = selectedAccount === 'ALL' ? 'All Accounts (Consolidated)' : selectedAccount;
+    const paymentText = selectedPaymentDetails === 'ALL' ? 'All Payment Details' : selectedPaymentDetails;
+    filterText.textContent = `Account: ${accountText} | Payment Details: ${paymentText}`;
+
+    // Filter transactions
+    let filteredTrans = state.transactions;
+    if (selectedAccount !== 'ALL') {
+      filteredTrans = filteredTrans.filter(t => t.account === selectedAccount);
+    }
+    if (selectedPaymentDetails !== 'ALL') {
+      filteredTrans = filteredTrans.filter(t => t.purpose === selectedPaymentDetails);
     }
 
-    if (!email.includes('@')) {
-        messageEl.className = 'form-message error';
-        messageEl.textContent = 'Invalid email format';
-        messageEl.style.display = 'block';
-        return;
+    if (filteredTrans.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">[ NO TRANSACTIONS MATCHING FILTER ]</td></tr>';
+      return;
     }
 
-    if (password.length < 6) {
-        messageEl.className = 'form-message error';
-        messageEl.textContent = 'Password must be at least 6 characters';
-        messageEl.style.display = 'block';
-        return;
-    }
+    // Sort newest first
+    const sortedTrans = filteredTrans.sort((a, b) => {
+      if (b.date !== a.date) return b.date.localeCompare(a.date);
+      return (b._ts || 0) - (a._ts || 0);
+    });
 
-    // Show connecting state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Authenticating...';
-    messageEl.className = 'form-message';
-    messageEl.textContent = '[ CONNECTING TO SERVER... ]';
-    messageEl.style.display = 'block';
-    messageEl.style.color = 'var(--accent-cyan)';
-    messageEl.style.borderColor = 'var(--accent-cyan)';
-    messageEl.style.background = 'rgba(0, 229, 255, 0.08)';
+    let totalD = 0;
+    let totalW = 0;
 
-    try {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
+    tbody.innerHTML = sortedTrans.map(txn => {
+      const isDeposit = txn.sign === '+';
+      let typeDisplay = isDeposit ? 'Deposit' : 'Withdraw';
 
-        const data = await response.json();
+      if (isDeposit) totalD += txn.amount;
+      else totalW += txn.amount;
 
-        if (!response.ok) {
-            messageEl.className = 'form-message error';
-            messageEl.textContent = data.details ? `${data.error} Details: ${data.details}` : (data.error || 'Login failed');
-            messageEl.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Authenticate';
-            return;
-        }
+      return `
+        <tr>
+          <td>${formatDateDisplay(txn.date)}</td>
+          <td style="font-family: monospace;">${txn.id.substring(0, 8)}</td>
+          <td>${typeDisplay}</td>
+          <td>${txn.purpose || '—'}</td>
+          <td>${txn.account || '—'}</td>
+          <td class="amount ${isDeposit ? 'pos' : 'neg'}">${isDeposit ? '+' : '-'} ${formatINR(txn.amount)}</td>
+        </tr>
+      `;
+    }).join('');
 
-        // Store real JWT token and user info
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('username', data.username);
-        localStorage.setItem('email', data.email);
+    document.getElementById('totalDeposits').textContent = '+ ' + formatINR(totalD);
+    document.getElementById('totalWithdrawals').textContent = '- ' + formatINR(totalW);
 
-        // Success
-        messageEl.className = 'form-message success';
-        messageEl.textContent = '[ AUTHENTICATED ] Redirecting to terminal...';
-        messageEl.style.display = 'block';
-
-        setTimeout(() => {
-            window.location.href = 'dashboard.html';
-        }, 1000);
-
-    } catch (err) {
-        messageEl.className = 'form-message error';
-        messageEl.textContent = 'Connection error. Is the server running? (node backend/server.js)';
-        messageEl.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Authenticate';
-    }
+    // Briefly delay then trigger print
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  });
 });
