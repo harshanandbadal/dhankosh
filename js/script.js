@@ -955,6 +955,135 @@ function renderUserInfo() {
   if (userIconEl) userIconEl.textContent = username.charAt(0).toUpperCase();
 }
 
+// ─── RENDER: GROWTH CHART ─────────────────────────────────
+
+let growthChart = null;
+
+function renderGrowthChart() {
+  const canvas = document.getElementById('growthChart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  
+  // Calculate labels and data for the last 7 days
+  const labels = [];
+  const data = [];
+  
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    
+    // Format label (e.g., "12 Mar")
+    const label = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+    labels.push(label);
+    
+    // Calculate Net Wealth for this specific date
+    const deposits = state.transactions
+      .filter(t => t.sign === '+' && t.date <= dateStr)
+      .reduce((sum, t) => sum + t.amount, 0);
+      
+    const withdrawals = state.transactions
+      .filter(t => t.sign === '-' && t.date <= dateStr)
+      .reduce((sum, t) => sum + t.amount, 0);
+      
+    const budgetReserved = state.budgets.reduce((sum, b) => sum + ((b.limit || 0) - (b.spent || 0)), 0);
+    
+    data.push(deposits - withdrawals - budgetReserved);
+  }
+
+  // Calculate percentage growth (today vs 7 days ago)
+  const growthPctEl = document.getElementById('netGrowthPercentage');
+  if (growthPctEl) {
+    const startVal = data[0];
+    const endVal = data[data.length - 1];
+    
+    if (startVal === endVal) {
+      growthPctEl.textContent = '0.00%';
+      growthPctEl.style.color = 'var(--text-muted)';
+    } else if (startVal === 0) {
+      growthPctEl.textContent = endVal > 0 ? '+100%' : '-100%';
+      growthPctEl.style.color = endVal > 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+    } else {
+      const diff = endVal - startVal;
+      const pct = (diff / Math.abs(startVal)) * 100;
+      growthPctEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+      growthPctEl.style.color = pct >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+    }
+  }
+
+  if (growthChart) {
+    growthChart.destroy();
+  }
+
+  // Ensure Chart.js is loaded
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded yet');
+    return;
+  }
+
+  growthChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Net Wealth',
+        data: data,
+        borderColor: '#00E5FF',
+        backgroundColor: 'rgba(0, 229, 255, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#00E5FF',
+        pointBorderColor: '#06070A',
+        pointHoverRadius: 6,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0D1017',
+          titleColor: '#E2E8F0',
+          bodyColor: '#00E5FF',
+          borderColor: '#171C26',
+          borderWidth: 1,
+          displayColors: false,
+          padding: 10,
+          titleFont: { family: 'Rajdhani', size: 14 },
+          bodyFont: { family: 'Fira Code', size: 12 },
+          callbacks: {
+            label: function(context) {
+              return 'Balance: ₹' + context.parsed.y.toLocaleString('en-IN');
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(23, 28, 38, 0.5)', drawBorder: false },
+          ticks: { color: '#4A5568', font: { family: 'Fira Code', size: 10 } }
+        },
+        y: {
+          grid: { color: 'rgba(23, 28, 38, 0.5)', drawBorder: false },
+          ticks: { 
+            color: '#4A5568', 
+            font: { family: 'Fira Code', size: 10 },
+            callback: function(value) {
+              if (Math.abs(value) >= 1000) return '₹' + (value/1000).toFixed(1) + 'k';
+              return '₹' + value;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
 // ─── RENDER ALL ───────────────────────────────────────────
 
 function renderAll() {
@@ -964,6 +1093,7 @@ function renderAll() {
   renderCustomers();
   renderTransactions();
   renderNetWealth();
+  renderGrowthChart();
   renderNotifications();
 }
 
