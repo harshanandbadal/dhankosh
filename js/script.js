@@ -15,7 +15,7 @@ const CREDIT_LIMITS = {
   kiwi: 30000,
 };
 
-const ACCOUNT_LABELS = {
+const BASE_ACCOUNT_LABELS = {
   airtel: 'Airtel Payment Bank',
   bob: 'Bank of Baroda',
   jupiter: 'Jupiter Federal Bank',
@@ -28,6 +28,14 @@ const ACCOUNT_LABELS = {
   supermoney: 'SuperMoney',
   kiwi: 'Kiwi Yes Bank',
 };
+
+function getAccountLabel(key) {
+  if (BASE_ACCOUNT_LABELS[key]) return BASE_ACCOUNT_LABELS[key];
+  const bank = state.banks.find(b => b.id === key);
+  if (bank) return `${bank.name} (${bank.accNo})`;
+  const credit = state.credit.find(c => c.id === key);
+  return credit ? `${credit.name} (${credit.last4})` : key;
+}
 
 // Budget system is now fully dynamic — no hardcoded limits or labels
 
@@ -46,13 +54,9 @@ function initializeParticles() {
 
 function getDefaultState() {
   return {
-    banks: {
-      airtel: 0, bob: 0, jupiter: 0, ubi: 0, slice: 0, cash: 0,
-    },
+    banks: [], // [{ id, name, accNo, balance }]
 
-    credit: {
-      amazon: 0, coral: 0, flipkart: 0, supermoney: 0, kiwi: 0,
-    },
+    credit: [],      // [{ id, name, last4, limit, linkedId }]
     budgets: [],       // [{ id, name, limit, spent }]
     customers: [],     // { id, name, phoneNumber, youGave, youGot }
     transactions: [],  // { id, date, type, purpose, account, amount, sign }
@@ -98,14 +102,74 @@ function loadState() {
       }
     }
 
-    return {
-      banks: { ...defaults.banks, ...parsed.banks },
+    // Migrate old object-format banks to new array format
+    let banks = [];
+    if (Array.isArray(parsed.banks)) {
+      banks = parsed.banks;
+    } else if (parsed.banks && typeof parsed.banks === 'object') {
+      const oldBanksMap = {
+        airtel: 'Airtel Payment Bank',
+        bob: 'Bank of Baroda',
+        jupiter: 'Jupiter Federal Bank',
+        ubi: 'Union Bank of India',
+        slice: 'Slice Small Finance Bank',
+        cash: 'Cash in Hand'
+      };
+      for (const [key, balance] of Object.entries(parsed.banks)) {
+        if (balance > 0) {
+          banks.push({
+            id: key,
+            name: oldBanksMap[key] || key,
+            accNo: 'N/A',
+            balance: balance || 0
+          });
+        }
+      }
+    }
 
-      credit: { ...defaults.credit, ...parsed.credit },
+    // Migrate old object-format credit to new array format
+    let creditArr = [];
+    if (Array.isArray(parsed.credit)) {
+      creditArr = parsed.credit;
+    } else if (parsed.credit && typeof parsed.credit === 'object') {
+      const oldCreditMap = {
+        amazon: 'Amazon Pay ICICI', coral: 'Coral ICICI', flipkart: 'Flipkart Axis',
+        supermoney: 'SuperMoney', kiwi: 'Kiwi Yes Bank'
+      };
+      for (const [key, val] of Object.entries(parsed.credit)) {
+        creditArr.push({
+          id: key,
+          name: oldCreditMap[key] || key,
+          last4: 'N/A',
+          limit: CREDIT_LIMITS[key] || 0,
+          linkedId: (key === 'coral') ? 'amazon' : null
+        });
+      }
+    }
+
+    const transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
+
+    // Migrate transaction account labels to "Name (XXXX)" format
+    transactions.forEach(txn => {
+      // Check Banks
+      const bank = banks.find(b => b.name === txn.account || `${b.name} (${b.accNo})` === txn.account);
+      if (bank) {
+        txn.account = `${bank.name} (${bank.accNo})`;
+        return;
+      }
+      // Check Credit Lines
+      const credit = creditArr.find(c => c.name === txn.account || `${c.name} (${c.last4})` === txn.account);
+      if (credit) {
+        txn.account = `${credit.name} (${credit.last4})`;
+      }
+    });
+
+    return {
+      banks: banks,
+      credit: creditArr,
       budgets: budgets,
       customers: Array.isArray(parsed.customers) ? parsed.customers : [],
-      p2p: Array.isArray(parsed.p2p) ? parsed.p2p : [],
-      transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
+      transactions: transactions,
       notifications: Array.isArray(parsed.notifications) ? parsed.notifications : [],
       netWealthTarget: typeof parsed.netWealthTarget === 'number' ? parsed.netWealthTarget : defaults.netWealthTarget,
     };
@@ -133,7 +197,6 @@ function saveState() {
           credit: state.credit,
           budgets: state.budgets,
           customers: state.customers,
-          p2p: state.p2p,
           transactions: state.transactions,
           notifications: state.notifications,
           netWealthTarget: state.netWealthTarget,
@@ -183,13 +246,61 @@ async function loadStateFromServer() {
     const data = await response.json();
     const defaults = getDefaultState();
 
+    // Handle server-side migration if needed
+    let banks = [];
+    if (Array.isArray(data.banks)) {
+      banks = data.banks;
+    } else if (data.banks && typeof data.banks === 'object') {
+      // Similar migration as above
+      const oldBanksMap = {
+        airtel: 'Airtel Payment Bank', bob: 'Bank of Baroda', jupiter: 'Jupiter Federal Bank',
+        ubi: 'Union Bank of India', slice: 'Slice Small Finance Bank', cash: 'Cash in Hand'
+      };
+      for (const [key, balance] of Object.entries(data.banks)) {
+        if (balance > 0) {
+          banks.push({ id: key, name: oldBanksMap[key] || key, accNo: 'N/A', balance: balance || 0 });
+        }
+      }
+    }
+
+    // Handle server-side migration for credit if needed
+    let creditArr = [];
+    if (Array.isArray(data.credit)) {
+      creditArr = data.credit;
+    } else if (data.credit && typeof data.credit === 'object') {
+      const oldCreditMap = {
+        amazon: 'Amazon Pay ICICI', coral: 'Coral ICICI', flipkart: 'Flipkart Axis',
+        supermoney: 'SuperMoney', kiwi: 'Kiwi Yes Bank'
+      };
+      for (const [key, val] of Object.entries(data.credit)) {
+        creditArr.push({ id: key, name: oldCreditMap[key] || key, last4: 'N/A', limit: CREDIT_LIMITS[key] || 0, linkedId: (key === 'coral' ? 'amazon' : null) });
+      }
+    }
+
+    const transactions = Array.isArray(data.transactions) ? data.transactions : [];
+
+    // Migrate transaction account labels to "Name (XXXX)" format
+    transactions.forEach(txn => {
+      // Check Banks
+      const bank = banks.find(b => b.name === txn.account || `${b.name} (${b.accNo})` === txn.account);
+      if (bank) {
+        txn.account = `${bank.name} (${bank.accNo})`;
+        return;
+      }
+      // Check Credit Lines
+      const credit = creditArr.find(c => c.name === txn.account || `${c.name} (${c.last4})` === txn.account);
+      if (credit) {
+        txn.account = `${credit.name} (${credit.last4})`;
+      }
+    });
+
     return {
-      banks: { ...defaults.banks, ...(data.banks || {}) },
-      credit: { ...defaults.credit, ...(data.credit || {}) },
+      banks: banks,
+      credit: creditArr,
       budgets: Array.isArray(data.budgets) ? data.budgets : [],
       customers: Array.isArray(data.customers) ? data.customers : [],
       p2p: Array.isArray(data.p2p) ? data.p2p : [],
-      transactions: Array.isArray(data.transactions) ? data.transactions : [],
+      transactions: transactions,
       notifications: Array.isArray(data.notifications) ? data.notifications : [],
       netWealthTarget: typeof data.netWealthTarget === 'number' ? data.netWealthTarget : defaults.netWealthTarget,
     };
@@ -227,21 +338,52 @@ function today() {
 // ─── RENDER: BANK ACCOUNTS ────────────────────────────────
 
 function renderBanks() {
-  const bankKeys = ['airtel', 'bob', 'jupiter', 'ubi', 'slice', 'cash'];
+  const list = document.getElementById('banksList');
+  const empty = document.getElementById('noBanks');
+  if (!list) return;
+
+  list.innerHTML = '';
   let totalCapital = 0;
 
-  bankKeys.forEach(key => {
-    const row = document.querySelector(`.bank-account-item[data-bank="${key}"]`);
-    if (!row) return;
+  if (state.banks.length === 0) {
+    if (empty) empty.style.display = 'block';
+    const capitalEl = document.getElementById('bankTotalCapital');
+    if (capitalEl) {
+      capitalEl.textContent = formatINR(0);
+      capitalEl.className = 'value pos';
+    }
+    return;
+  }
 
-    const val = state.banks[key] || 0;
+  if (empty) empty.style.display = 'none';
+
+  state.banks.forEach(bank => {
+    const val = bank.balance || 0;
     totalCapital += val;
 
-    const valueEl = row.querySelector('.value');
-    if (valueEl) {
-      valueEl.textContent = formatINR(val);
-      valueEl.className = 'value ' + (val >= 0 ? 'pos' : 'neg');
-    }
+    const item = document.createElement('div');
+    item.className = 'bank-account-item';
+    item.dataset.id = bank.id;
+
+    item.innerHTML = `
+      <div class="bank-header">
+        <span class="bank-name">${escapeHtml(bank.name)}</span>
+        <span class="value ${val >= 0 ? 'pos' : 'neg'}">${formatINR(val)}</span>
+      </div>
+      <div class="bank-acc-no">A/C NO.: ${escapeHtml(bank.accNo)}</div>
+      <div class="bank-actions">
+        <button class="bank-action-btn deposit-btn" data-action="deposit" data-bank="${bank.id}"
+            title="Quick Deposit">⚡ Quick Deposit</button>
+        <button class="bank-action-btn withdraw-btn" data-action="withdraw" data-bank="${bank.id}"
+            title="Quick Withdraw">💰 Quick Withdraw</button>
+      </div>
+    `;
+
+    // Attach event listeners
+    item.querySelector('.deposit-btn').addEventListener('click', () => openQuickTxnModal('deposit', bank.id));
+    item.querySelector('.withdraw-btn').addEventListener('click', () => openQuickTxnModal('withdraw', bank.id));
+
+    list.appendChild(item);
   });
 
   // Update the panel header total capital display
@@ -250,78 +392,215 @@ function renderBanks() {
     capitalEl.textContent = formatINR(totalCapital);
     capitalEl.className = 'value ' + (totalCapital >= 0 ? 'pos' : 'neg');
   }
+
+  // Also update dropdowns
+  populateBankDropdowns();
+}
+
+function populateBankDropdowns() {
+  const optLiquid = document.getElementById('opt-liquid');
+  const spentsOptLiquid = document.getElementById('spents-opt-liquid');
+
+  if (optLiquid) {
+    optLiquid.innerHTML = '';
+    state.banks.forEach(bank => {
+      const opt = document.createElement('option');
+      opt.value = bank.id;
+      opt.textContent = `${bank.name} (${bank.accNo})`;
+      optLiquid.appendChild(opt);
+    });
+  }
+
+  if (spentsOptLiquid) {
+    spentsOptLiquid.innerHTML = '';
+    state.banks.forEach(bank => {
+      const opt = document.createElement('option');
+      opt.value = bank.id;
+      opt.textContent = `${bank.name} (${bank.accNo})`;
+      spentsOptLiquid.appendChild(opt);
+    });
+  }
+}
+
+function deleteBank(bankId) {
+  const bank = state.banks.find(b => b.id === bankId);
+  const bankName = bank ? bank.name : 'this bank';
+  confirmDelete(`Are you sure you want to delete "${bankName}"?`, () => {
+    state.banks = state.banks.filter(b => b.id !== bankId);
+    saveState();
+    renderBanks();
+    renderNetWealth();
+    addNotification('Bank account removed');
+  });
 }
 
 
 // ─── RENDER: CREDIT LINES ─────────────────────────────────
 
 function renderCredit() {
-  const creditKeys = ['amazon', 'coral', 'flipkart', 'supermoney', 'kiwi'];
-  const items = document.querySelectorAll('.credit-item');
+  const list = document.getElementById('creditList');
+  const empty = document.getElementById('noCredit');
+  if (!list) return;
+
+  list.innerHTML = '';
+
+  if (state.credit.length === 0) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+
+  if (empty) empty.style.display = 'none';
 
   // Helper function to calculate outstanding for an account
   function getOutstandingForAccount(accountKey) {
-    const creditLabel = ACCOUNT_LABELS[accountKey];
-    let outstanding = 0;
+    const label = getAccountLabel(accountKey);
 
+    let outstanding = 0;
     state.transactions.forEach(txn => {
-      if (txn.account === creditLabel) {
-        if (txn.sign === '+') {
-          // Deposit/Payment reduces outstanding
-          outstanding -= txn.amount;
-        } else if (txn.sign === '-') {
-          // Withdrawal/Spending increases outstanding
-          outstanding += txn.amount;
-        }
+      if (txn.account === label) {
+        if (txn.sign === '+') outstanding -= txn.amount;
+        else if (txn.sign === '-') outstanding += txn.amount;
       }
     });
 
     return Math.max(0, outstanding);
   }
 
-  items.forEach((item, i) => {
-    const key = creditKeys[i];
-    if (!key) return;
+  // Pre-calculate outstandings for all cards
+  const outstandings = {};
+  state.credit.forEach(card => {
+    outstandings[card.id] = getOutstandingForAccount(card.id);
+  });
 
-    let outstanding = 0;
-    let limit = CREDIT_LIMITS[key] || 0;
+  state.credit.forEach(card => {
+    let limit = card.limit || 0;
+    let outstandingDisplay = outstandings[card.id];
+    let sharedOutstanding = outstandings[card.id];
+    let isLinked = false;
+    let linkLabel = '';
 
-    // Amazon and Coral are linked - they share the same limit and combined outstanding
-    if (key === 'amazon' || key === 'coral') {
-      const amazonOutstanding = getOutstandingForAccount('amazon');
-      const coralOutstanding = getOutstandingForAccount('coral');
-      outstanding = amazonOutstanding + coralOutstanding;
-      // Both share the same limit (60000)
-      limit = CREDIT_LIMITS['amazon'];
+    if (card.linkedId) {
+      const parent = state.credit.find(c => c.id === card.linkedId);
+      if (parent) {
+        limit = parent.limit || 0;
+        // All cards linked to same parent (and parent itself) share limit
+        const relatives = state.credit.filter(c => c.id === card.linkedId || c.linkedId === card.linkedId);
+        sharedOutstanding = relatives.reduce((sum, rel) => sum + outstandings[rel.id], 0);
+        isLinked = true;
+        linkLabel = `Linked to ${parent.name}`;
+      }
     } else {
-      outstanding = getOutstandingForAccount(key);
+      // Check if this card is a parent to others
+      const children = state.credit.filter(c => c.linkedId === card.id);
+      if (children.length > 0) {
+        sharedOutstanding = sharedOutstanding + children.reduce((sum, child) => sum + outstandings[child.id], 0);
+        isLinked = true;
+        linkLabel = `Limit shared with ${children.length} card(s)`;
+      }
     }
 
-    const available = limit - outstanding;
-    const pct = limit > 0 ? Math.min((outstanding / limit) * 100, 100) : 0;
+    const available = limit - sharedOutstanding;
+    const pct = limit > 0 ? Math.min((sharedOutstanding / limit) * 100, 100) : 0;
 
-    const details = item.querySelectorAll('.credit-value');
-    if (details[0]) {
-      details[0].textContent = formatINR(outstanding);
-      details[0].className = 'credit-value neg';
-    }
-    if (details[1]) {
-      details[1].textContent = formatINR(available);
-      details[1].className = 'credit-value pos';
-    }
+    const item = document.createElement('div');
+    item.className = 'credit-item';
+    item.dataset.id = card.id;
 
+    item.innerHTML = `
+      <div class="credit-main-header">
+        <span class="credit-name">${escapeHtml(card.name)}</span>
+        ${isLinked ? `<span class="link-icon" title="${escapeHtml(linkLabel)}">🔗</span>` : '<span></span>'}
+      </div>
+      <div class="credit-card-no">CARD NO.: ${escapeHtml(card.last4)}</div>
+      <div class="credit-stats-grid">
+        <div class="credit-stat">
+          <span class="stat-label">Outstanding</span>
+          <span class="stat-value neg">${formatINR(outstandingDisplay)}</span>
+        </div>
+        <div class="credit-stat">
+          <span class="stat-label">Available</span>
+          <span class="stat-value pos">${formatINR(available)}</span>
+        </div>
+        <div class="credit-stat">
+          <span class="stat-label">Total Limit</span>
+          <span class="stat-value">${formatINR(limit)}/-</span>
+        </div>
+      </div>
+      <div class="progress-track credit-tracking-line">
+        <div class="progress-fill"></div>
+      </div>
+    `;
+
+    // Progressive fill styling
     const fill = item.querySelector('.progress-fill');
     if (fill) {
       fill.style.width = pct.toFixed(1) + '%';
-      // Color the bar based on usage
-      if (pct > 80) {
-        fill.style.background = 'var(--accent-red)';
-      } else if (pct > 50) {
-        fill.style.background = 'var(--accent-gold)';
-      } else {
-        fill.style.background = 'var(--accent-cyan)';
-      }
+      if (pct > 80) fill.style.background = 'var(--accent-red)';
+      else if (pct > 50) fill.style.background = 'var(--accent-gold)';
+      else fill.style.background = 'var(--accent-cyan)';
     }
+
+    list.appendChild(item);
+  });
+
+  // Update total outstanding in panel header
+  const totalOutstanding = state.credit.reduce((sum, card) => sum + outstandings[card.id], 0);
+  const creditTotalEl = document.getElementById('creditTotalOutstanding');
+  if (creditTotalEl) {
+    creditTotalEl.textContent = formatINR(totalOutstanding);
+  }
+
+  populateCreditDropdowns();
+}
+
+function populateCreditDropdowns() {
+  const optCredit = document.getElementById('opt-credit');
+  const spentsOptCredit = document.getElementById('spents-opt-credit');
+  const linkedSel = document.getElementById('creditLinked');
+
+  if (optCredit) {
+    optCredit.innerHTML = '';
+    state.credit.forEach(card => {
+      const opt = document.createElement('option');
+      opt.value = card.id;
+      opt.textContent = `${card.name} (${card.last4})`;
+      optCredit.appendChild(opt);
+    });
+  }
+
+  if (spentsOptCredit) {
+    spentsOptCredit.innerHTML = '';
+    state.credit.forEach(card => {
+      const opt = document.createElement('option');
+      opt.value = card.id;
+      opt.textContent = `${card.name} (${card.last4})`;
+      spentsOptCredit.appendChild(opt);
+    });
+  }
+
+  if (linkedSel) {
+    const currentVal = linkedSel.value;
+    linkedSel.innerHTML = '<option value="">-- No link (Standalone) --</option>';
+    state.credit.forEach(card => {
+      // Don't link a card to itself or to another card that is already linked
+      const opt = document.createElement('option');
+      opt.value = card.id;
+      opt.textContent = `${card.name} (${card.last4})`;
+      linkedSel.appendChild(opt);
+    });
+    linkedSel.value = currentVal;
+  }
+}
+
+function deleteCredit(id) {
+  const card = state.credit.find(c => c.id === id);
+  const name = card ? card.name : 'this credit line';
+  confirmDelete(`Are you sure you want to delete "${name}"?`, () => {
+    state.credit = state.credit.filter(c => c.id !== id);
+    saveState();
+    renderCredit();
+    renderNetWealth();
+    addNotification('Credit line removed');
   });
 }
 
@@ -352,24 +631,24 @@ function renderBudgets() {
     item.dataset.id = budget.id;
 
     item.innerHTML = `
-      <div class="bank-info">
-        <span class="label">${escapeHtml(budget.name)}</span>
-        <span class="value pos">${formatINR(limit)}</span>
+      <div class="budget-main-header">
+        <span class="budget-name">${escapeHtml(budget.name)}</span>
+        <span class="budget-limit-display neg">${formatINR(limit)}/-</span>
       </div>
-      <div class="budget-stats">
+      <div class="budget-stats-grid">
         <div class="budget-stat">
-          <div class="budget-label">Utilised</div>
-          <div class="budget-value neg">${formatINR(spent)}</div>
+          <span class="stat-label">Utilised</span>
+          <span class="stat-value warning-yellow">${formatINR(spent)}</span>
         </div>
         <div class="budget-stat">
-          <div class="budget-label">Available</div>
-          <div class="budget-value ${available >= 0 ? 'pos' : 'neg'}">${formatINR(available)}</div>
+          <span class="stat-label">Available</span>
+          <span class="stat-value ${available >= 0 ? 'pos' : 'neg'}">${formatINR(available)}</span>
         </div>
       </div>
-      <div class="progress-track">
+      <div class="progress-track budget-tracking-line">
         <div class="progress-fill"></div>
       </div>
-      <div class="bank-actions">
+      <div class="budget-actions centered">
         <button class="bank-action-btn budget-limit-btn" data-id="${budget.id}">📈 Limit Increase</button>
         <button class="bank-action-btn budget-delete-btn" data-id="${budget.id}">🗑️ Delete</button>
       </div>
@@ -401,12 +680,12 @@ function renderBudgets() {
   // Also update the Withdrawal form's payment details dropdown
   populateSpentsDropdown();
 
-  // Update total available in panel header
-  const totalAvailable = state.budgets.reduce((sum, b) => sum + ((b.limit || 0) - (b.spent || 0)), 0);
+  // Update total limit in panel header
+  const totalLimit = state.budgets.reduce((sum, b) => sum + (b.limit || 0), 0);
   const totalEl = document.getElementById('budgetTotalAvailable');
   if (totalEl) {
-    totalEl.textContent = formatINR(totalAvailable);
-    totalEl.className = totalAvailable >= 0 ? 'value pos' : 'value neg';
+    totalEl.textContent = formatINR(totalLimit);
+    totalEl.className = 'value neg';
   }
 }
 
@@ -464,68 +743,6 @@ function deleteBudget(budgetId) {
   });
 }
 
-// ─── RENDER: P2P ──────────────────────────────────────────
-
-function renderP2P() {
-  const payablesList = document.getElementById('payablesList');
-  const receivablesList = document.getElementById('receivablesList');
-  if (!payablesList || !receivablesList) return;
-
-  const payables = state.p2p.filter(e => e.type === 'payable');
-  const receivables = state.p2p.filter(e => e.type === 'receivable');
-
-  function buildRow(entry) {
-    const row = document.createElement('div');
-    row.className = 'p2p-row';
-    row.dataset.id = entry.id;
-
-    const amtClass = entry.type === 'payable' ? 'payable' : 'receivable';
-    const amtPrefix = entry.type === 'payable' ? '- ' : '+ ';
-
-    row.innerHTML = `
-      <div class="p2p-row-content">
-        <div class="p2p-label">
-          <span class="name">${escapeHtml(entry.name)}</span>
-          ${entry.details ? `<span class="details">${escapeHtml(entry.details)}</span>` : ''}
-        </div>
-        <span class="p2p-amount ${amtClass}">${amtPrefix}${formatINR(entry.amount)}</span>
-      </div>
-      <button class="p2p-delete-btn" data-id="${entry.id}">[ ✕ ]</button>
-    `;
-
-    row.querySelector('.p2p-delete-btn').addEventListener('click', () => {
-      deleteP2P(entry.id);
-    });
-
-    return row;
-  }
-
-  payablesList.innerHTML = '';
-  if (payables.length === 0) {
-    payablesList.innerHTML = '<div class="no-transactions" style="padding:0.5rem 0; font-size:0.8rem;">[ NONE ]</div>';
-  } else {
-    payables.forEach(e => payablesList.prepend(buildRow(e)));
-  }
-
-  receivablesList.innerHTML = '';
-  if (receivables.length === 0) {
-    receivablesList.innerHTML = '<div class="no-transactions" style="padding:0.5rem 0; font-size:0.8rem;">[ NONE ]</div>';
-  } else {
-    receivables.forEach(e => receivablesList.prepend(buildRow(e)));
-  }
-}
-
-function deleteP2P(id) {
-  const entry = state.p2p.find(e => e.id === id);
-  const entryName = entry ? entry.name : 'this entry';
-  confirmDelete(`Are you sure you want to delete the P2P entry for "${entryName}"?`, () => {
-    state.p2p = state.p2p.filter(e => e.id !== id);
-    saveState();
-    renderP2P();
-    renderNetWealth();
-    addNotification('P2P entry removed');
-  });
-}
 
 // ─── RENDER: TRANSACTIONS ─────────────────────────────────
 
@@ -613,22 +830,47 @@ function deleteTransaction(txnId) {
   const txnLabel = `${txn.sign === '+' ? 'Deposit' : 'Withdrawal'} of ${formatINR(txn.amount)} — ${txn.purpose}`;
   confirmDelete(`Are you sure you want to delete this transaction?\n\n${txnLabel}`, () => {
     // Reverse-lookup account key from label
-    const accountKey = Object.keys(ACCOUNT_LABELS).find(
-      key => ACCOUNT_LABELS[key] === txn.account
+    let accountKey = Object.keys(BASE_ACCOUNT_LABELS).find(
+      key => BASE_ACCOUNT_LABELS[key] === txn.account
     );
+
+    // If not found in BASE labels, check dynamic banks & credit lines
+    if (!accountKey) {
+      const bank = state.banks.find(b => {
+        const label = `${b.name} (${b.accNo})`;
+        return b.name === txn.account || label === txn.account;
+      });
+      if (bank) {
+        accountKey = bank.id;
+      } else {
+        const credit = state.credit.find(c => {
+          const label = `${c.name} (${c.last4})`;
+          return c.name === txn.account || label === txn.account;
+        });
+        if (credit) accountKey = credit.id;
+      }
+    }
 
     if (accountKey) {
       // Reverse the balance change
       if (txn.sign === '+') {
         // Was a deposit — subtract it back
-        if (state.banks[accountKey] !== undefined) state.banks[accountKey] -= txn.amount;
+        const bank = state.banks.find(b => b.id === accountKey);
+        if (bank) bank.balance -= txn.amount;
       } else {
         // Was a withdrawal — add it back
-        if (state.banks[accountKey] !== undefined) state.banks[accountKey] += txn.amount;
+        const bank = state.banks.find(b => b.id === accountKey);
+        if (bank) bank.balance += txn.amount;
       }
 
       // Reverse credit card impact
-      if (state.credit[accountKey] !== undefined) {
+      const targetCredit = state.credit.find(c => c.id === accountKey);
+      if (targetCredit) {
+        // Outstanding is dynamic, but we can update state if it were stored as balance
+        // Here outstanding is calculated from history, so just removing txn is enough
+        // but if we had a cached outstanding field, we'd update it here.
+      } else if (state.credit[accountKey] !== undefined) {
+        // Fallback for legacy
         if (txn.sign === '-') state.credit[accountKey] -= txn.amount;
         else state.credit[accountKey] += txn.amount;
       }
@@ -720,7 +962,6 @@ function renderAll() {
   renderCredit();
   renderBudgets();
   renderCustomers();
-  renderP2P();
   renderTransactions();
   renderNetWealth();
   renderNotifications();
@@ -956,7 +1197,7 @@ function initAddPaymentsModal() {
     }
 
     const purposeLabel = getPurposeLabel(purpose, custom);
-    const accountLabel = ACCOUNT_LABELS[account] || account;
+    const accountLabel = getAccountLabel(account);
 
     // Apply state changes
     applyPayment(purpose, account, amount);
@@ -988,8 +1229,9 @@ function applyPayment(purpose, account, amount) {
   switch (purpose) {
     case 'deposit':
       // Add money to a bank account
-      if (state.banks[account] !== undefined) {
-        state.banks[account] += amount;
+      const bank = state.banks.find(b => b.id === account);
+      if (bank) {
+        bank.balance += amount;
       }
       break;
 
@@ -1001,8 +1243,11 @@ function applyPayment(purpose, account, amount) {
 
     default:
       // others — treat as inflow to the selected account
-      if (state.banks[account] !== undefined) {
-        state.banks[account] += amount;
+      const otherBank = state.banks.find(b => b.id === account);
+      if (otherBank) {
+        otherBank.balance += amount;
+      } else if (state.credit.find(c => c.id === account)) {
+        // Credit outstanding is strictly history-based
       } else if (state.credit[account] !== undefined) {
         state.credit[account] += amount;
       }
@@ -1116,11 +1361,12 @@ function initSpentsModal() {
       categoryLabel = custom ? custom : 'Others';
     }
 
-    const bankLabel = ACCOUNT_LABELS[bankKey] || bankKey;
+    const bankLabel = getAccountLabel(bankKey);
 
     // Deduct from the appropriate account
-    if (state.banks[bankKey] !== undefined) {
-      state.banks[bankKey] -= amount;
+    const withdrawalBank = state.banks.find(b => b.id === bankKey);
+    if (withdrawalBank) {
+      withdrawalBank.balance -= amount;
     }
     // Credit card spending is tracked via transaction history
 
@@ -1213,11 +1459,20 @@ function renderCustomers() {
   if (empty) empty.style.display = 'none';
 
   state.customers.forEach(customer => {
+    // SYNC FROM HISTORY: Calculate youGave and youGot based on transaction records
+    const customerTxns = state.transactions.filter(t => t.account === customer.name);
+    const youGave = customerTxns.filter(t => t.sign === '+').reduce((sum, t) => sum + t.amount, 0);
+    const youGot = customerTxns.filter(t => t.sign === '-').reduce((sum, t) => sum + t.amount, 0);
+
+    // Update object values (optional but good for data consistency)
+    customer.youGave = youGave;
+    customer.youGot = youGot;
+
     const row = document.createElement('div');
     row.className = 'customer-item';
     row.dataset.id = customer.id;
 
-    const net = customer.youGave - customer.youGot;
+    const net = youGave - youGot;
     const netClass = net > 0 ? 'pos' : net < 0 ? 'neg' : '';
 
     row.innerHTML = `
@@ -1256,10 +1511,9 @@ function deleteCustomer(customerId) {
   const customerName = customer ? customer.name : 'this customer';
   confirmDelete(`Are you sure you want to delete customer "${customerName}"? All associated transactions will also be removed.`, () => {
     state.customers = state.customers.filter(c => c.id !== customerId);
-    state.transactions = state.transactions.filter(t => {
-      const purpose = t.purpose || '';
-      return !purpose.includes(`Customer`) || !purpose.includes(state.customers.find(c => c.id === customerId)?.name || '');
-    });
+    // Properly remove all transactions where this customer was the 'account'
+    state.transactions = state.transactions.filter(t => t.account !== customerName);
+
     saveState();
     renderCustomers();
     renderTransactions();
@@ -1607,22 +1861,147 @@ function initBudgetLimitModal() {
   });
 }
 
-// ─── BANK ACTION BUTTONS: QUICK DEPOSIT/WITHDRAW ────────────
+// ─── MODAL: BANK CREATE ───────────────────────────────────
 
-function initBankActionButtons() {
-  const buttons = document.querySelectorAll('.bank-action-btn');
+function initBankCreateModal() {
+  const openBtn = document.getElementById('createBankBtn');
+  const closeBtn = document.getElementById('closeBankCreateBtn');
+  const overlay = document.getElementById('bankCreateModalOverlay');
+  const form = document.getElementById('bankCreateForm');
 
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const action = btn.dataset.action; // 'deposit' or 'withdraw'
-      const bank = btn.dataset.bank;
+  if (!form) return;
 
-      if (!action || !bank) return;
+  if (openBtn) openBtn.addEventListener('click', () => openModal('bankCreateModalOverlay'));
 
-      openQuickTxnModal(action, bank);
-    });
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    closeModal('bankCreateModalOverlay');
+    form.reset();
+  });
+
+  if (overlay) overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      closeModal('bankCreateModalOverlay');
+      form.reset();
+    }
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const name = document.getElementById('bankName').value.trim();
+    const accNo = document.getElementById('bankAccNo').value.trim();
+    const initialAmount = parseFloat(document.getElementById('bankInitialAmount').value);
+
+    if (!name || !accNo) {
+      showFormError(form, 'Please enter both bank name and last 4 digits of account number.');
+      return;
+    }
+    if (accNo.length !== 4) {
+      showFormError(form, 'Please enter exactly 4 digits of the account number.');
+      return;
+    }
+    if (isNaN(initialAmount)) {
+      showFormError(form, 'Please enter a valid initial amount.');
+      return;
+    }
+
+    const bankId = generateId();
+    const bank = {
+      id: bankId,
+      name,
+      accNo,
+      balance: initialAmount,
+    };
+
+    state.banks.push(bank);
+
+    // If initial amount > 0, record a transaction
+    if (initialAmount > 0) {
+      state.transactions.push({
+        id: generateId(),
+        date: today(),
+        type: 'DEPOSIT',
+        purpose: 'Initial Amount',
+        account: getAccountLabel(bankId),
+        amount: initialAmount,
+        sign: '+',
+        _ts: Date.now(),
+      });
+    }
+
+    saveState();
+    renderBanks();
+    renderTransactions();
+    renderNetWealth();
+    addNotification(`Bank created: ${name}`);
+    closeModal('bankCreateModalOverlay');
+    form.reset();
   });
 }
+
+// ─── MODAL: CREDIT CREATE ─────────────────────────────────
+
+function initCreditCreateModal() {
+  const openBtn = document.getElementById('createCreditBtn');
+  const closeBtn = document.getElementById('closeCreditCreateBtn');
+  const overlay = document.getElementById('creditCreateModalOverlay');
+  const form = document.getElementById('creditCreateForm');
+
+  if (!form) return;
+
+  if (openBtn) openBtn.addEventListener('click', () => {
+    populateCreditDropdowns(); // Refresh linkable cards
+    openModal('creditCreateModalOverlay');
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    closeModal('creditCreateModalOverlay');
+    form.reset();
+  });
+
+  if (overlay) overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      closeModal('creditCreateModalOverlay');
+      form.reset();
+    }
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const name = document.getElementById('creditName').value.trim();
+    const last4 = document.getElementById('creditLast4').value.trim();
+    const linkedId = document.getElementById('creditLinked').value;
+    const limit = parseFloat(document.getElementById('creditTotalLimit').value);
+
+    if (!name || !last4) {
+      showFormError(form, 'Please enter both card name and last 4 digits.');
+      return;
+    }
+    if (isNaN(limit) || limit <= 0) {
+      showFormError(form, 'Please enter a valid limit.');
+      return;
+    }
+
+    const card = {
+      id: generateId(),
+      name,
+      last4,
+      limit,
+      linkedId: linkedId || null
+    };
+
+    state.credit.push(card);
+    saveState();
+    renderCredit();
+    renderNetWealth();
+    addNotification(`Credit line created: ${name}`);
+    closeModal('creditCreateModalOverlay');
+    form.reset();
+  });
+}
+
+
 
 function openQuickTxnModal(action, bank) {
   const modalTitle = document.getElementById('quickTxnModalTitle');
@@ -1687,13 +2066,18 @@ function initQuickTxnForm() {
       purpose += ` - ${description}`;
     }
 
-    const accountLabel = ACCOUNT_LABELS[bank] || bank;
+    const accountLabel = getAccountLabel(bank);
 
     // Apply state changes
-    if (action === 'deposit') {
-      state.banks[bank] = (state.banks[bank] || 0) + amount;
-    } else {
-      state.banks[bank] = (state.banks[bank] || 0) - amount;
+    const targetBank = state.banks.find(b => b.id === bank);
+    if (targetBank) {
+      if (action === 'deposit') {
+        targetBank.balance = (targetBank.balance || 0) + amount;
+      } else {
+        targetBank.balance = (targetBank.balance || 0) - amount;
+      }
+    } else if (state.credit.find(c => c.id === bank)) {
+      // Credit outstanding is history-based
     }
 
     // Log transaction
@@ -1941,10 +2325,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateSystemStatus();
 
   // Initialize all modal forms and event listeners
+  initBankCreateModal();
+  initCreditCreateModal();
   initAddPaymentsModal();
   initSpentsModal();
   initQuickTxnForm();
-  initBankActionButtons();
   initCustomerModal();
   initCustomerAmountModals();
   initResetModal();
