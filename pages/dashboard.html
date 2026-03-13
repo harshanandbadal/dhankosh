@@ -148,16 +148,6 @@
                 </div>
             </section>
         </div>
-        
-        <section class="panel chart-panel" style="--accent-color: var(--accent-cyan);">
-            <div class="panel-header">
-                <h2>Net Growth (Recent 7 Days)</h2>
-                <span class="value cyan" id="netGrowthPercentage">+0.00%</span>
-            </div>
-            <div class="panel-content chart-container" style="height: 300px; padding: 1rem;">
-                <canvas id="growthChart"></canvas>
-            </div>
-        </section>
 
         <section class="panel">
             <div class="panel-header">
@@ -200,6 +190,16 @@
             <div class="panel-content">
                 <div id="customersList" class="customers-list"></div>
                 <div id="noCustomers" class="no-transactions">[ NO CUSTOMERS YET ]</div>
+            </div>
+        </section>
+
+        <section class="panel chart-panel" style="--accent-color: var(--accent-cyan);">
+            <div class="panel-header">
+                <h2>Net Growth (Recent 7 Days)</h2>
+                <span class="value cyan" id="netGrowthPercentage">+0.00%</span>
+            </div>
+            <div class="panel-content chart-container" style="height: 300px; padding: 1rem;">
+                <canvas id="growthChart"></canvas>
             </div>
         </section>
 
