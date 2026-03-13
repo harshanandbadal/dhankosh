@@ -12,6 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Rajdhani:wght@500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -147,6 +148,16 @@
                 </div>
             </section>
         </div>
+        
+        <section class="panel chart-panel" style="--accent-color: var(--accent-cyan);">
+            <div class="panel-header">
+                <h2>Net Growth (Recent 7 Days)</h2>
+                <span class="value cyan" id="netGrowthPercentage">+0.00%</span>
+            </div>
+            <div class="panel-content chart-container" style="height: 300px; padding: 1rem;">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </section>
 
         <section class="panel">
             <div class="panel-header">
