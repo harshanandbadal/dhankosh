@@ -85,11 +85,10 @@ const User = mongoose.model('User', userSchema);
 
 const dashboardStateSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  banks: { type: mongoose.Schema.Types.Mixed, default: {} },
-  credit: { type: mongoose.Schema.Types.Mixed, default: {} },
+  banks: { type: mongoose.Schema.Types.Mixed, default: [] },
+  credit: { type: mongoose.Schema.Types.Mixed, default: [] },
   budgets: { type: mongoose.Schema.Types.Mixed, default: [] },
   customers: { type: mongoose.Schema.Types.Mixed, default: [] },
-  p2p: { type: mongoose.Schema.Types.Mixed, default: [] },
   transactions: { type: mongoose.Schema.Types.Mixed, default: [] },
   notifications: { type: mongoose.Schema.Types.Mixed, default: [] },
   updatedAt: { type: Date, default: Date.now },
@@ -156,11 +155,10 @@ app.post('/api/auth/register', async (req, res) => {
     // Create default dashboard state for the new user
     const defaultState = new DashboardState({
       userId: user._id,
-      banks: { airtel: 0, bob: 0, jupiter: 0, ubi: 0, slice: 0, cash: 0 },
-      credit: { amazon: 0, coral: 0, flipkart: 0, supermoney: 0, kiwi: 0 },
+      banks: [],
+      credit: [],
       budgets: [],
       customers: [],
-      p2p: [],
       transactions: [],
       notifications: [],
     });
@@ -238,11 +236,10 @@ app.get('/api/state', authMiddleware, async (req, res) => {
       // Create default state if none exists
       const newState = new DashboardState({
         userId: req.userId,
-        banks: { airtel: 0, bob: 0, jupiter: 0, ubi: 0, slice: 0, cash: 0 },
-        credit: { amazon: 0, coral: 0, flipkart: 0, supermoney: 0, kiwi: 0 },
+        banks: [],
+        credit: [],
         budgets: [],
         customers: [],
-        p2p: [],
         transactions: [],
         notifications: [],
       });
@@ -252,11 +249,10 @@ app.get('/api/state', authMiddleware, async (req, res) => {
 
     // Return only the data fields (not _id, __v, userId)
     res.json({
-      banks: stateDoc.banks || {},
-      credit: stateDoc.credit || {},
+      banks: stateDoc.banks || [],
+      credit: stateDoc.credit || [],
       budgets: stateDoc.budgets || [],
       customers: stateDoc.customers || [],
-      p2p: stateDoc.p2p || [],
       transactions: stateDoc.transactions || [],
       notifications: stateDoc.notifications || [],
     });
@@ -276,11 +272,10 @@ app.put('/api/state', authMiddleware, async (req, res) => {
       { userId: req.userId },
       {
         $set: {
-          banks: banks || {},
-          credit: credit || {},
+          banks: banks || [],
+          credit: credit || [],
           budgets: budgets || [],
           customers: customers || [],
-          p2p: p2p || [],
           transactions: transactions || [],
           notifications: notifications || [],
           updatedAt: new Date(),
