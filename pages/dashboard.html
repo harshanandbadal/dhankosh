@@ -59,8 +59,8 @@
             <div class="user-info">
                 <div class="user-icon" id="userIcon">U</div>
                 <span id="username">User</span>
-                <button class="logout-btn" id="printStatementBtn"
-                    onclick="window.open('print.html', '_blank')">Print Statement</button>
+                <button class="logout-btn" id="printStatementBtn" onclick="window.open('print.html', '_blank')">Print
+                    Statement</button>
                 <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
         </div>
@@ -68,6 +68,14 @@
 
     <div class="quick-action-bar">
 
+        <button class="quick-action-btn bank-action" id="createBankBtn">
+            <span class="action-icon">🏦</span>
+            <span class="action-label">Create Bank</span>
+        </button>
+        <button class="quick-action-btn credit-action" id="createCreditBtn">
+            <span class="action-icon">💳</span>
+            <span class="action-label">Create Credit Line</span>
+        </button>
         <button class="quick-action-btn budget-action" id="setBudgetBtn">
             <span class="action-icon">📋</span>
             <span class="action-label">Set Spents & Budgets</span>
@@ -114,7 +122,7 @@
                             </button>
                             <button class="quick-action-btn withdraw-btn" id="spentsBtn">
                                 <span class="action-icon">💰</span>
-                                <span class="action-label">Withdrawal</span>
+                                <span class="action-label">Withdraw</span>
                             </button>
                         </div>
 
@@ -146,204 +154,26 @@
                 <span class="value pos" id="bankTotalCapital">CAPTIAL</span>
             </div>
             <div class="panel-content">
-                <div class="bank-account-item" data-bank="airtel">
-                    <div class="bank-info">
-                        <span class="label">Airtel Payment Bank</span>
-                        <span class="value pos">₹ 0</span>
-                    </div>
-                    <div class="bank-actions">
-                        <button class="bank-action-btn deposit-btn" data-action="deposit" data-bank="airtel"
-                            title="Quick Deposit">⚡ Deposit</button>
-                        <button class="bank-action-btn withdraw-btn" data-action="withdraw" data-bank="airtel"
-                            title="Quick Withdraw">💰 Withdraw</button>
-                    </div>
-                </div>
-                <div class="bank-account-item" data-bank="bob">
-                    <div class="bank-info">
-                        <span class="label">Bank of Baroda</span>
-                        <span class="value pos">₹ 0</span>
-                    </div>
-                    <div class="bank-actions">
-                        <button class="bank-action-btn deposit-btn" data-action="deposit" data-bank="bob"
-                            title="Quick Deposit">⚡ Deposit</button>
-                        <button class="bank-action-btn withdraw-btn" data-action="withdraw" data-bank="bob"
-                            title="Quick Withdraw">💰 Withdraw</button>
-                    </div>
-                </div>
-                <div class="bank-account-item" data-bank="jupiter">
-                    <div class="bank-info">
-                        <span class="label">Jupiter Federal Bank</span>
-                        <span class="value pos">₹ 0</span>
-                    </div>
-                    <div class="bank-actions">
-                        <button class="bank-action-btn deposit-btn" data-action="deposit" data-bank="jupiter"
-                            title="Quick Deposit">⚡ Deposit</button>
-                        <button class="bank-action-btn withdraw-btn" data-action="withdraw" data-bank="jupiter"
-                            title="Quick Withdraw">💰 Withdraw</button>
-                    </div>
-                </div>
-                <div class="bank-account-item" data-bank="ubi">
-                    <div class="bank-info">
-                        <span class="label">Union Bank of India</span>
-                        <span class="value pos">₹ 0</span>
-                    </div>
-                    <div class="bank-actions">
-                        <button class="bank-action-btn deposit-btn" data-action="deposit" data-bank="ubi"
-                            title="Quick Deposit">⚡ Deposit</button>
-                        <button class="bank-action-btn withdraw-btn" data-action="withdraw" data-bank="ubi"
-                            title="Quick Withdraw">💰 Withdraw</button>
-                    </div>
-                </div>
-                <div class="bank-account-item" data-bank="slice">
-                    <div class="bank-info">
-                        <span class="label">Slice Small Finance Bank</span>
-                        <span class="value pos">₹ 0</span>
-                    </div>
-                    <div class="bank-actions">
-                        <button class="bank-action-btn deposit-btn" data-action="deposit" data-bank="slice"
-                            title="Quick Deposit">⚡ Deposit</button>
-                        <button class="bank-action-btn withdraw-btn" data-action="withdraw" data-bank="slice"
-                            title="Quick Withdraw">💰 Withdraw</button>
-                    </div>
-                </div>
-                <div class="bank-account-item" data-bank="cash">
-                    <div class="bank-info">
-                        <span class="label">Cash in Hand</span>
-                        <span class="value pos">₹ 0</span>
-                    </div>
-                    <div class="bank-actions">
-                        <button class="bank-action-btn deposit-btn" data-action="deposit" data-bank="cash"
-                            title="Quick Deposit">⚡ Deposit</button>
-                        <button class="bank-action-btn withdraw-btn" data-action="withdraw" data-bank="cash"
-                            title="Quick Withdraw">💰 Withdraw</button>
-                    </div>
-                </div>
+                <div id="banksList" class="banks-list"></div>
+                <div id="noBanks" class="no-transactions">[ NO BANKS ADDED ]</div>
             </div>
         </section>
 
         <section class="panel">
             <div class="panel-header">
                 <h2>Credit Lines</h2>
-                <span class="value">CREDIT</span>
+                <span class="value neg" id="creditTotalOutstanding">₹ 0</span>
             </div>
             <div class="panel-content">
-                <div class="credit-item">
-                    <div class="credit-header">
-                        <span class="label">Amazon Pay ICICI</span>
-                    </div>
-                    <div class="credit-details">
-                        <div class="credit-detail">
-                            <div class="credit-label">Outstanding</div>
-                            <div class="credit-value neg">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Available</div>
-                            <div class="credit-value pos">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Total Limit</div>
-                            <div class="credit-value credit-limit-value">₹ 60,000/-</div>
-                        </div>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"></div>
-                    </div>
-                </div>
-                <div class="credit-item">
-                    <div class="credit-header">
-                        <span class="label">Coral ICICI</span>
-                    </div>
-                    <div class="credit-details">
-                        <div class="credit-detail">
-                            <div class="credit-label">Outstanding</div>
-                            <div class="credit-value neg">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Available</div>
-                            <div class="credit-value pos">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Total Limit</div>
-                            <div class="credit-value credit-limit-value">₹ 60,000/-</div>
-                        </div>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"></div>
-                    </div>
-                </div>
-                <div class="credit-item">
-                    <div class="credit-header">
-                        <span class="label">Flipkart Axis</span>
-                    </div>
-                    <div class="credit-details">
-                        <div class="credit-detail">
-                            <div class="credit-label">Outstanding</div>
-                            <div class="credit-value neg">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Available</div>
-                            <div class="credit-value pos">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Total Limit</div>
-                            <div class="credit-value credit-limit-value">₹ 77,000/-</div>
-                        </div>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"></div>
-                    </div>
-                </div>
-                <div class="credit-item">
-                    <div class="credit-header">
-                        <span class="label">SuperMoney</span>
-                    </div>
-                    <div class="credit-details">
-                        <div class="credit-detail">
-                            <div class="credit-label">Outstanding</div>
-                            <div class="credit-value neg">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Available</div>
-                            <div class="credit-value pos">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Total Limit</div>
-                            <div class="credit-value credit-limit-value">₹ 4,500/-</div>
-                        </div>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"></div>
-                    </div>
-                </div>
-                <div class="credit-item">
-                    <div class="credit-header">
-                        <span class="label">Kiwi Yes Bank</span>
-                    </div>
-                    <div class="credit-details">
-                        <div class="credit-detail">
-                            <div class="credit-label">Outstanding</div>
-                            <div class="credit-value neg">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Available</div>
-                            <div class="credit-value pos">₹ 0</div>
-                        </div>
-                        <div class="credit-detail">
-                            <div class="credit-label">Total Limit</div>
-                            <div class="credit-value credit-limit-value">₹ 30,000/-</div>
-                        </div>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"></div>
-                    </div>
-                </div>
+                <div id="creditList" class="credit-list"></div>
+                <div id="noCredit" class="no-transactions">[ NO CREDIT LINES ADDED ]</div>
             </div>
         </section>
 
         <section class="panel">
             <div class="panel-header">
                 <h2>Future Spents & Budgets</h2>
-                <span class="value pos" id="budgetTotalAvailable">₹ 0</span>
+                <span class="value neg" id="budgetTotalAvailable">₹ 0</span>
             </div>
             <div class="panel-content">
                 <div id="budgetsList" class="budgets-list"></div>
@@ -425,19 +255,10 @@
                     <select id="txnOrigin" class="txn-input" required disabled>
                         <option value="" disabled selected>-- Select Destination Account --</option>
                         <optgroup label="Bank Accounts" id="opt-liquid">
-                            <option value="airtel">Airtel Payment Bank</option>
-                            <option value="bob">Bank of Baroda</option>
-                            <option value="jupiter">Jupiter Federal Bank</option>
-                            <option value="ubi">Union Bank of India</option>
-                            <option value="slice">Slice Small Finance Bank</option>
-                            <option value="cash">Cash in Hand</option>
+                            <!-- Dynamically populated -->
                         </optgroup>
                         <optgroup label="Credit Lines" id="opt-credit">
-                            <option value="amazon">Amazon Pay ICICI</option>
-                            <option value="coral">Coral ICICI</option>
-                            <option value="flipkart">Flipkart Axis</option>
-                            <option value="supermoney">SuperMoney</option>
-                            <option value="kiwi">Kiwi Yes Bank</option>
+                            <!-- Dynamically populated -->
                         </optgroup>
 
                     </select>
@@ -450,10 +271,10 @@
         </div>
     </div>
 
-    <!-- Withdrawal Form -->
+    <!-- Withdraw Form -->
     <div class="spents-modal-overlay" id="spentsModalOverlay">
         <div class="spents-modal" id="spentsModal">
-            <h2>[ Withdrawal ]</h2>
+            <h2>[ Withdraw ]</h2>
             <form id="spentsForm">
                 <div class="txn-form-group">
                     <label for="spentsDate">Date of Execution</label>
@@ -467,6 +288,9 @@
                     <label for="paymentsdetails">Payments Details</label>
                     <select id="paymentsdetails" class="txn-input" required>
                         <option value="" disabled selected>-- Select Purpose --</option>
+                        <optgroup label="Budgets" id="budgetOptionsGroup">
+                            <!-- Dynamically populated from budgets -->
+                        </optgroup>
                         <optgroup label="Transfers">
                             <option value="transfer_to_bank">Transfer To Bank</option>
                             <option value="upi_transfer">UPI Transfer</option>
@@ -497,9 +321,6 @@
                             <option value="entertainment">Entertainment</option>
                             <option value="personal_care">Personal Care</option>
                         </optgroup>
-                        <optgroup label="Budgets" id="budgetOptionsGroup">
-                            <!-- Dynamically populated from budgets -->
-                        </optgroup>
                         <option value="others">Others</option>
                     </select>
                 </div>
@@ -512,20 +333,11 @@
                     <label for="spentsBank">Mode of Payment</label>
                     <select id="spentsBank" class="txn-input" required>
                         <option value="" disabled selected>-- Select Mode of Payment --</option>
-                        <optgroup label="Bank Accounts">
-                            <option value="airtel">Airtel Payment Bank</option>
-                            <option value="bob">Bank of Baroda</option>
-                            <option value="jupiter">Jupiter Federal Bank</option>
-                            <option value="ubi">Union Bank of India</option>
-                            <option value="slice">Slice Small Finance Bank</option>
-                            <option value="cash">Cash in Hand</option>
+                        <optgroup label="Bank Accounts" id="spents-opt-liquid">
+                            <!-- Dynamically populated -->
                         </optgroup>
-                        <optgroup label="Credit Lines" id="opt-credit">
-                            <option value="amazon">Amazon Pay ICICI</option>
-                            <option value="coral">Coral ICICI</option>
-                            <option value="flipkart">Flipkart Axis</option>
-                            <option value="supermoney">SuperMoney</option>
-                            <option value="kiwi">Kiwi Yes Bank</option>
+                        <optgroup label="Credit Lines" id="spents-opt-credit">
+                            <!-- Dynamically populated -->
                         </optgroup>
                     </select>
                 </div>
@@ -636,6 +448,67 @@
         </div>
     </div>
 
+    <!-- Credit Create Modal -->
+    <div class="credit-create-modal-overlay" id="creditCreateModalOverlay">
+        <div class="credit-create-modal" id="creditCreateModal">
+            <h2>[ Create Credit Line ]</h2>
+            <form id="creditCreateForm">
+                <div class="txn-form-group">
+                    <label for="creditName">CREDIT CARD NAME</label>
+                    <input type="text" id="creditName" class="txn-input" placeholder="e.g., Amazon Pay ICICI..."
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditLast4">LAST 4 DIGIT OF CARD.:</label>
+                    <input type="text" id="creditLast4" class="txn-input" placeholder="e.g., 1234..." required
+                        maxlength="4">
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditLinked">LINKED</label>
+                    <select id="creditLinked" class="txn-input">
+                        <option value="">-- No link (Standalone) --</option>
+                        <!-- Existing cards to link with -->
+                    </select>
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditTotalLimit">TOTAL LIMIT</label>
+                    <input type="number" id="creditTotalLimit" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeCreditCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bank Create Modal -->
+    <div class="bank-create-modal-overlay" id="bankCreateModalOverlay">
+        <div class="bank-create-modal" id="bankCreateModal">
+            <h2>[ Create Bank Account ]</h2>
+            <form id="bankCreateForm">
+                <div class="txn-form-group">
+                    <label for="bankName">BANK NAME</label>
+                    <input type="text" id="bankName" class="txn-input" placeholder="e.g., HDFC Bank..." required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="bankAccNo">LAST 4 DIGIT OF A/C NO.:</label>
+                    <input type="text" id="bankAccNo" class="txn-input" placeholder="e.g., 1234" maxlength="4" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="bankInitialAmount">INITIAL AMOUNT</label>
+                    <input type="number" id="bankInitialAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeBankCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Target Amount Modal -->
     <div class="txn-modal-overlay" id="targetModalOverlay">
         <div class="txn-modal" id="targetModal">
@@ -670,7 +543,7 @@
                         required>
                 </div>
                 <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ Add ]</button>
+                    <button type="submit" class="btn-terminal btn-submit">[ SET ]</button>
                     <button type="button" class="btn-terminal btn-cancel" id="closeBudgetCreateBtn">[ Cancel ]</button>
                 </div>
             </form>
