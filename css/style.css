@@ -53,8 +53,8 @@
 /* --- Body & Background Environment --- */
 body {
     background: radial-gradient(ellipse at 20% 50%, rgba(0, 100, 150, 0.3) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(5, 26, 46, 0.4) 0%, transparent 50%),
-                linear-gradient(135deg, #06070A 0%, #0D1017 25%, #0A0D14 75%, #051A2E 100%);
+        radial-gradient(ellipse at 80% 80%, rgba(5, 26, 46, 0.4) 0%, transparent 50%),
+        linear-gradient(135deg, #06070A 0%, #0D1017 25%, #0A0D14 75%, #051A2E 100%);
     background-attachment: fixed;
     color: var(--text-main);
     font-family: var(--font-mono);
@@ -278,10 +278,58 @@ h3 {
     color: var(--accent-red);
 }
 
+.quick-action-btn.bank-action {
+    background: rgba(0, 230, 118, 0.08);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.quick-action-btn.credit-action {
+    background: rgba(255, 61, 0, 0.08);
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+}
+
+.quick-action-btn.budget-action {
+    background: rgba(255, 196, 0, 0.08);
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+}
+
+.quick-action-btn.customer-action {
+    background: rgba(179, 136, 255, 0.08);
+    border-color: var(--accent-purple);
+    color: var(--accent-purple);
+}
+
 .quick-action-btn.reset-btn:hover {
     background: rgba(255, 61, 0, 0.15);
     box-shadow: 0 0 12px rgba(255, 61, 0, 0.3);
     border-color: rgba(255, 61, 0, 0.8);
+}
+
+.quick-action-btn.bank-action:hover {
+    background: rgba(0, 230, 118, 0.15);
+    box-shadow: 0 0 12px rgba(0, 230, 118, 0.3);
+    border-color: rgba(0, 230, 118, 0.8);
+}
+
+.quick-action-btn.credit-action:hover {
+    background: rgba(255, 61, 0, 0.15);
+    box-shadow: 0 0 12px rgba(255, 61, 0, 0.3);
+    border-color: rgba(255, 61, 0, 0.8);
+}
+
+.quick-action-btn.budget-action:hover {
+    background: rgba(255, 196, 0, 0.15);
+    box-shadow: 0 0 12px rgba(255, 196, 0, 0.3);
+    border-color: rgba(255, 196, 0, 0.8);
+}
+
+.quick-action-btn.customer-action:hover {
+    background: rgba(179, 136, 255, 0.15);
+    box-shadow: 0 0 12px rgba(179, 136, 255, 0.3);
+    border-color: rgba(179, 136, 255, 0.8);
 }
 
 /* --- Notifications --- */
@@ -681,11 +729,15 @@ h3 {
     display: flex;
     flex-direction: column;
     padding: 1rem;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
     border-bottom: 1px dashed var(--grid-line);
     transition: var(--transition-fast);
 }
 
 .bank-account-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 1rem;
     border-bottom: none;
 }
 
@@ -694,36 +746,32 @@ h3 {
     padding-left: 1.5rem;
 }
 
-.bank-info {
+.bank-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    flex-wrap: nowrap;
+    margin-bottom: 0.25rem;
 }
 
-.bank-info .label {
+.bank-name {
     color: var(--text-bright);
     font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
+    font-size: 0.95rem;
 }
 
-.bank-info .value {
-    color: var(--accent-green);
-    font-weight: 600;
-    text-shadow: 0 0 8px rgba(0, 230, 118, 0.3);
-    white-space: nowrap;
-    flex-shrink: 0;
+.bank-acc-no {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
 }
 
 .bank-actions {
     display: flex;
     gap: 0.8rem;
-    justify-content: center;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
 }
 
 /* Bank Action Buttons */
@@ -930,43 +978,71 @@ h3 {
     border-bottom: none;
 }
 
-.credit-header {
+.credit-main-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
-    cursor: default;
+    margin-bottom: 0.25rem;
 }
 
-.credit-header .label {
-    font-weight: 600;
+.credit-name {
     color: var(--text-bright);
+    font-weight: 600;
     font-size: 0.95rem;
 }
 
-.credit-details {
-    display: flex;
-    gap: 2.5rem;
-    font-size: 0.85rem;
-    margin-bottom: 0.75rem;
-    align-items: flex-start;
+.link-icon {
+    font-size: 0.9rem;
 }
 
-.credit-detail {
+.credit-card-no {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
+}
+
+.credit-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.credit-stat {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.35rem;
 }
 
-.credit-label {
+.stat-label {
+    font-size: 0.75rem;
     color: var(--text-muted);
-    font-size: 0.7rem;
+    font-family: var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-.credit-value {
+.stat-value {
+    font-size: 0.9rem;
     font-weight: 600;
-    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.credit-tracking-line {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 0.5rem;
+}
+
+.credit-tracking-line .progress-fill {
+    height: 100%;
+    transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
 }
 
 /* --- Budget Items (matching Credit Lines style) --- */
@@ -990,43 +1066,85 @@ h3 {
     border-bottom: none;
 }
 
-.budget-header {
+.budget-main-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
-    cursor: crosshair;
+    margin-bottom: 0.5rem;
 }
 
-.budget-header .label {
-    font-weight: 600;
+.budget-name {
     color: var(--text-bright);
+    font-weight: 600;
     font-size: 0.95rem;
 }
 
-.budget-details {
-    display: flex;
-    gap: 2.5rem;
-    font-size: 0.85rem;
-    margin-bottom: 0.75rem;
-    align-items: flex-start;
+.budget-limit-display.neg {
+    color: var(--accent-red) !important;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
 }
 
-.budget-detail {
+.pos {
+    color: var(--accent-green) !important;
+    text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+.neg {
+    color: var(--accent-red) !important;
+    text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
+}
+
+.budget-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 1rem;
+}
+
+.budget-stat {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.35rem;
 }
 
-.budget-label {
+.stat-label {
+    font-size: 0.75rem;
     color: var(--text-muted);
-    font-size: 0.7rem;
+    font-family: var(--font-mono);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-.budget-value {
+.stat-value {
+    font-size: 0.9rem;
     font-weight: 600;
-    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.stat-value.warning-yellow {
+    color: var(--accent-gold) !important;
+}
+
+.budget-tracking-line {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    margin: 1rem 0;
+}
+
+.budget-tracking-line .progress-fill {
+    height: 100%;
+    transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.budget-actions.centered {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 0.5rem;
 }
 
 .budget-value.neg {
@@ -1473,7 +1591,17 @@ h3 {
 }
 
 /* Modal Overlay */
-.txn-modal-overlay {
+.txn-modal-overlay,
+.quick-txn-modal-overlay,
+.customer-amount-modal-overlay,
+.reset-modal-overlay,
+.spents-modal-overlay,
+.customer-modal-overlay,
+.budget-create-modal-overlay,
+.budget-spent-modal-overlay,
+.budget-limit-modal-overlay,
+.credit-create-modal-overlay,
+.bank-create-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -1491,13 +1619,33 @@ h3 {
     transition: opacity 0.3s ease;
 }
 
-.txn-modal-overlay.active {
+.txn-modal-overlay.active,
+.quick-txn-modal-overlay.active,
+.customer-amount-modal-overlay.active,
+.reset-modal-overlay.active,
+.spents-modal-overlay.active,
+.customer-modal-overlay.active,
+.budget-create-modal-overlay.active,
+.budget-spent-modal-overlay.active,
+.budget-limit-modal-overlay.active,
+.credit-create-modal-overlay.active,
+.bank-create-modal-overlay.active {
     opacity: 1;
     pointer-events: all;
 }
 
 /* Modal Box */
-.txn-modal {
+.txn-modal,
+.quick-txn-modal,
+.customer-amount-modal,
+.reset-modal,
+.spents-modal,
+.customer-modal,
+.budget-create-modal,
+.budget-spent-modal,
+.budget-limit-modal,
+.credit-create-modal,
+.bank-create-modal {
     background: var(--bg-panel, #0D1017);
     border: 1px solid var(--grid-line, #171C26);
     padding: 2.5rem;
@@ -1510,7 +1658,17 @@ h3 {
 }
 
 /* Neon top border for modal */
-.txn-modal::before {
+.txn-modal::before,
+.quick-txn-modal::before,
+.customer-amount-modal::before,
+.reset-modal::before,
+.spents-modal::before,
+.customer-modal::before,
+.budget-create-modal::before,
+.budget-spent-modal::before,
+.budget-limit-modal::before,
+.credit-create-modal::before,
+.bank-create-modal::before {
     content: '';
     position: absolute;
     top: -1px;
@@ -1521,11 +1679,81 @@ h3 {
     box-shadow: 0 0 10px var(--accent-cyan, #00E5FF);
 }
 
-.txn-modal-overlay.active .txn-modal {
+/* Modal Custom Accents */
+.reset-modal,
+.reset-modal::before,
+.reset-modal h2,
+.delete-confirm-modal,
+.delete-confirm-modal::before {
+    border-color: var(--accent-red) !important;
+}
+
+.reset-modal h2 {
+    color: var(--accent-red) !important;
+    text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
+}
+
+.reset-modal::before,
+.delete-confirm-modal::before {
+    background: var(--accent-red) !important;
+    box-shadow: 0 0 10px var(--accent-red) !important;
+}
+
+.quick-txn-modal::before,
+.spents-modal::before,
+.budget-create-modal::before,
+.budget-spent-modal::before {
+    background: var(--accent-gold) !important;
+    box-shadow: 0 0 10px var(--accent-gold) !important;
+}
+
+.customer-modal::before {
+    background: var(--accent-purple) !important;
+    box-shadow: 0 0 10px var(--accent-purple) !important;
+}
+
+.bank-create-modal,
+.bank-create-modal::before,
+.bank-create-modal h2 {
+    border-color: var(--accent-green) !important;
+}
+
+.bank-create-modal h2 {
+    color: var(--accent-green) !important;
+    text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+.budget-limit-modal::before,
+.bank-create-modal::before {
+    background: var(--accent-green) !important;
+    box-shadow: 0 0 10px var(--accent-green) !important;
+}
+
+.txn-modal-overlay.active .txn-modal,
+.quick-txn-modal-overlay.active .quick-txn-modal,
+.customer-amount-modal-overlay.active .customer-amount-modal,
+.reset-modal-overlay.active .reset-modal,
+.spents-modal-overlay.active .spents-modal,
+.customer-modal-overlay.active .customer-modal,
+.budget-create-modal-overlay.active .budget-create-modal,
+.budget-spent-modal-overlay.active .budget-spent-modal,
+.budget-limit-modal-overlay.active .budget-limit-modal,
+.credit-create-modal-overlay.active .credit-create-modal,
+.bank-create-modal-overlay.active .bank-create-modal {
     transform: translateY(0);
 }
 
-.txn-modal h2 {
+.txn-modal h2,
+.quick-txn-modal h2,
+.customer-amount-modal h2,
+.spents-modal h2,
+.customer-modal h2,
+.budget-create-modal h2,
+.budget-spent-modal h2,
+.budget-limit-modal h2,
+.credit-create-modal h2,
+.bank-create-modal h2,
+.reset-modal h2 {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
     color: var(--text-bright, #E2E8F0);
     font-size: 1.8rem;
@@ -1645,180 +1873,11 @@ select.txn-input option {
     }
 }
 
-/* --- Quick Transaction Modal --- */
-.quick-txn-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(6, 7, 10, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
 
-.quick-txn-modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
 
-/* Quick Transaction Modal Box */
-.quick-txn-modal {
-    background: var(--bg-panel, #0D1017);
-    border: 1px solid var(--grid-line, #171C26);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 450px;
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
 
-/* Neon top border for quick modal */
-.quick-txn-modal::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    height: 3px;
-    background: var(--accent-gold, #FFC400);
-    box-shadow: 0 0 10px var(--accent-gold, #FFC400);
-}
 
-.quick-txn-modal-overlay.active .quick-txn-modal {
-    transform: translateY(0);
-}
 
-.quick-txn-modal h2 {
-    font-family: var(--font-display, 'Rajdhani', sans-serif);
-    color: var(--text-bright, #E2E8F0);
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--grid-line, #171C26);
-    padding-bottom: 0.5rem;
-}
-
-/* --- Customer Amount Modal --- */
-.customer-amount-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(6, 7, 10, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.customer-amount-modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-/* Customer Amount Modal Box */
-.customer-amount-modal {
-    background: var(--bg-panel, #0D1017);
-    border: 1px solid var(--grid-line, #171C26);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 450px;
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-
-/* Neon top border for customer modal */
-.customer-amount-modal::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    height: 3px;
-    background: var(--accent-cyan, #00E5FF);
-    box-shadow: 0 0 10px var(--accent-cyan, #00E5FF);
-}
-
-.customer-amount-modal-overlay.active .customer-amount-modal {
-    transform: translateY(0);
-}
-
-.customer-amount-modal h2 {
-    font-family: var(--font-display, 'Rajdhani', sans-serif);
-    color: var(--text-bright, #E2E8F0);
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--grid-line, #171C26);
-    padding-bottom: 0.5rem;
-}
-
-/* --- Reset Modal --- */
-.reset-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(6, 7, 10, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.reset-modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.reset-modal {
-    background: var(--bg-panel, #0D1017);
-    border: 1px solid var(--accent-red, #FF3D00);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 450px;
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(255, 61, 0, 0.2);
-}
-
-.reset-modal::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    height: 3px;
-    background: var(--accent-red, #FF3D00);
-    box-shadow: 0 0 10px var(--accent-red, #FF3D00);
-}
-
-.reset-modal-overlay.active .reset-modal {
-    transform: translateY(0);
-}
 
 .reset-modal h2 {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
@@ -1906,56 +1965,7 @@ select.txn-input option {
     box-shadow: 0 0 12px rgba(255, 61, 0, 0.3);
 }
 
-/* --- Spents Modal --- */
-.spents-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(6, 7, 10, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
 
-.spents-modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.spents-modal {
-    background: var(--bg-panel, #0D1017);
-    border: 1px solid var(--grid-line, #171C26);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 500px;
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-
-.spents-modal::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    height: 3px;
-    background: var(--accent-gold, #FFC400);
-    box-shadow: 0 0 10px var(--accent-gold, #FFC400);
-}
-
-.spents-modal-overlay.active .spents-modal {
-    transform: translateY(0);
-}
 
 .spents-modal h2 {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
@@ -1966,56 +1976,7 @@ select.txn-input option {
     padding-bottom: 0.5rem;
 }
 
-/* --- Customer Modal --- */
-.customer-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(6, 7, 10, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
 
-.customer-modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.customer-modal {
-    background: var(--bg-panel, #0D1017);
-    border: 1px solid var(--grid-line, #171C26);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 500px;
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-
-.customer-modal::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    height: 3px;
-    background: var(--accent-purple, #B388FF);
-    box-shadow: 0 0 10px var(--accent-purple, #B388FF);
-}
-
-.customer-modal-overlay.active .customer-modal {
-    transform: translateY(0);
-}
 
 .customer-modal h2 {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
@@ -2230,9 +2191,6 @@ select.txn-input option {
     color: var(--accent-purple);
 }
 
-.txn-data-type.p2p {
-    color: var(--accent-cyan);
-}
 
 .txn-data-type.withdrawal {
     color: var(--accent-red);
@@ -2294,7 +2252,7 @@ select.txn-input option {
 }
 
 /* --- Responsive Adjustments --- */
-    /* Removed redundant/conflicting media query block at line 2296 
+/* Removed redundant/conflicting media query block at line 2296 
        as it is covered by the consolidated responsive section below. */
 
 /* This ensures the panel spans the entire width of the grid */
@@ -2380,56 +2338,7 @@ select.txn-input option {
     box-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
 }
 
-/* --- Budget Create Modal --- */
-.budget-create-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(6, 7, 10, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
 
-.budget-create-modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.budget-create-modal {
-    background: var(--bg-panel, #0D1017);
-    border: 1px solid var(--grid-line, #171C26);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 480px;
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-
-.budget-create-modal::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    height: 3px;
-    background: var(--accent-gold, #FFC400);
-    box-shadow: 0 0 10px var(--accent-gold, #FFC400);
-}
-
-.budget-create-modal-overlay.active .budget-create-modal {
-    transform: translateY(0);
-}
 
 .budget-create-modal h2 {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
@@ -2441,56 +2350,7 @@ select.txn-input option {
     text-shadow: 0 0 10px rgba(255, 196, 0, 0.3);
 }
 
-/* --- Budget Spent Modal --- */
-.budget-spent-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(6, 7, 10, 0.85);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
 
-.budget-spent-modal-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-.budget-spent-modal {
-    background: var(--bg-panel, #0D1017);
-    border: 1px solid var(--grid-line, #171C26);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 420px;
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-
-.budget-spent-modal::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    height: 3px;
-    background: var(--accent-gold, #FFC400);
-    box-shadow: 0 0 10px var(--accent-gold, #FFC400);
-}
-
-.budget-spent-modal-overlay.active .budget-spent-modal {
-    transform: translateY(0);
-}
 
 .budget-spent-modal h2 {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
@@ -2764,13 +2624,16 @@ select.txn-input option {
         padding: 0.6rem;
     }
 
-    .txn-col-id, .txn-data-id,
-    .txn-col-account, .txn-data-account {
+    .txn-col-id,
+    .txn-data-id,
+    .txn-col-account,
+    .txn-data-account {
         display: none;
     }
 
     .txn-data-purpose {
-        white-space: normal; /* Allow purpose to wrap on mobile */
+        white-space: normal;
+        /* Allow purpose to wrap on mobile */
         word-break: break-word;
         padding-right: 0.5rem;
     }
@@ -2781,10 +2644,6 @@ select.txn-input option {
         margin-left: 0.5rem;
     }
 
-    /* P2P section */
-    .p2p-section-header {
-        font-size: 0.8rem;
-    }
 
     /* Budget stats */
     .budget-stats {
@@ -2794,7 +2653,6 @@ select.txn-input option {
     /* Modals — full width on mobile */
     .txn-modal,
     .spents-modal,
-    .p2p-modal,
     .quick-txn-modal,
     .customer-amount-modal,
     .budget-create-modal,
@@ -2983,7 +2841,6 @@ select.txn-input option {
     /* Modals */
     .txn-modal,
     .spents-modal,
-    .p2p-modal,
     .quick-txn-modal,
     .customer-amount-modal,
     .budget-create-modal,
@@ -2994,7 +2851,6 @@ select.txn-input option {
 
     .txn-modal h2,
     .spents-modal h2,
-    .p2p-modal h2,
     .budget-create-modal h2 {
         font-size: 1.2rem;
     }
@@ -3024,12 +2880,6 @@ select.txn-input option {
         font-size: 0.7rem;
     }
 
-    /* P2P rows */
-    .p2p-row-content {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-    }
 }
 
 /* --- Delete Confirmation Modal --- */
