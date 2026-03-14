@@ -26,7 +26,6 @@
     --accent-gold: #FFC400;
     /* Spents/Budgets */
     --accent-purple: #B388FF;
-    /* Merchants */
 
     /* Typography */
     --font-display: 'Rajdhani', sans-serif;
@@ -297,9 +296,9 @@ h3 {
 }
 
 .quick-action-btn.customer-action {
-    background: rgba(179, 136, 255, 0.08);
-    border-color: var(--accent-purple);
-    color: var(--accent-purple);
+    background: rgba(247, 88, 57, 0.08);
+    border-color: #F75839;
+    color: #F75839;
 }
 
 .quick-action-btn.reset-btn:hover {
@@ -327,9 +326,9 @@ h3 {
 }
 
 .quick-action-btn.customer-action:hover {
-    background: rgba(179, 136, 255, 0.15);
-    box-shadow: 0 0 12px rgba(179, 136, 255, 0.3);
-    border-color: rgba(179, 136, 255, 0.8);
+    background: rgba(247, 88, 57, 0.15);
+    box-shadow: 0 0 12px rgba(247, 88, 57, 0.3);
+    border-color: rgba(247, 88, 57, 0.8);
 }
 
 /* --- Notifications --- */
@@ -607,6 +606,12 @@ h3 {
 .chart-panel {
     grid-column: 1 / -1;
     margin-bottom: 2rem;
+    --accent-color: var(--accent-cyan);
+}
+
+.chart-container {
+    height: 300px;
+    padding: 1rem;
 }
 
 .chart-container canvas {
@@ -780,7 +785,7 @@ h3 {
 .bank-actions {
     display: flex;
     gap: 0.8rem;
-    justify-content: flex-start;
+    justify-content: center;
     margin-top: 0.5rem;
 }
 
@@ -1505,7 +1510,7 @@ h3 {
 
 /* Credit Lines Panel */
 .dashboard-grid>.panel:nth-of-type(2) {
-    --accent-color: var(--accent-cyan);
+    --accent-color: var(--accent-red);
     --delay: 0.2s;
 }
 
@@ -1517,7 +1522,7 @@ h3 {
 
 /* Customer Panel */
 .dashboard-grid>.panel:nth-of-type(4) {
-    --accent-color: var(--text-bright);
+    --accent-color: #F75839;
     --delay: 0.4s;
 }
 
@@ -1717,9 +1722,25 @@ h3 {
     box-shadow: 0 0 10px var(--accent-gold) !important;
 }
 
+.credit-create-modal::before {
+    background: var(--accent-red) !important;
+    box-shadow: 0 0 10px var(--accent-red) !important;
+}
+
+.customer-modal,
+.customer-modal::before,
+.customer-modal h2 {
+    border-color: #F75839 !important;
+}
+
 .customer-modal::before {
-    background: var(--accent-purple) !important;
-    box-shadow: 0 0 10px var(--accent-purple) !important;
+    background: #F75839 !important;
+    box-shadow: 0 0 10px #F75839 !important;
+}
+
+.customer-modal h2 {
+    color: #F75839 !important;
+    text-shadow: 0 0 10px rgba(247, 88, 57, 0.3);
 }
 
 .bank-create-modal,
@@ -1731,6 +1752,28 @@ h3 {
 .bank-create-modal h2 {
     color: var(--accent-green) !important;
     text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+.credit-create-modal,
+.credit-create-modal::before,
+.credit-create-modal h2 {
+    border-color: var(--accent-red) !important;
+}
+
+.credit-create-modal h2 {
+    color: var(--accent-red) !important;
+    text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
+}
+
+.budget-create-modal,
+.budget-create-modal::before,
+.budget-create-modal h2 {
+    border-color: var(--accent-gold) !important;
+}
+
+.budget-create-modal h2 {
+    color: var(--accent-gold) !important;
+    text-shadow: 0 0 10px rgba(255, 196, 0, 0.3);
 }
 
 .budget-limit-modal::before,
@@ -1763,13 +1806,18 @@ h3 {
 .budget-limit-modal h2,
 .credit-create-modal h2,
 .bank-create-modal h2,
-.reset-modal h2 {
+.reset-modal h2,
+.delete-confirm-modal h2 {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
     color: var(--text-bright, #E2E8F0);
-    font-size: 1.8rem;
+    font-size: 1.5rem;
+    font-weight: 700;
     margin-bottom: 2rem;
     border-bottom: 1px solid var(--grid-line, #171C26);
     padding-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Form Elements */
@@ -1961,6 +2009,17 @@ select.txn-input option {
     display: flex;
     gap: 1rem;
     margin-top: 2.5rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+    .reset-actions {
+        flex-direction: column;
+    }
+
+    .reset-actions button {
+        width: 100%;
+    }
 }
 
 /* Red button variant for reset */
@@ -2354,10 +2413,14 @@ select.txn-input option {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
     color: var(--accent-gold, #FFC400);
     font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
     border-bottom: 1px solid var(--grid-line, #171C26);
     padding-bottom: 0.5rem;
     text-shadow: 0 0 10px rgba(255, 196, 0, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 
@@ -2614,7 +2677,6 @@ select.txn-input option {
     /* Transaction History — responsive table/list */
     .transactions-wrapper {
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
     }
 
     .transactions-header,
@@ -2664,10 +2726,7 @@ select.txn-input option {
     .txn-modal,
     .spents-modal,
     .quick-txn-modal,
-    .customer-amount-modal,
-    .budget-create-modal,
-    .budget-spent-modal,
-    .budget-limit-modal {
+    .customer-amount-modal {
         width: 95%;
         max-width: 95%;
         padding: 1.5rem;
@@ -2852,16 +2911,12 @@ select.txn-input option {
     .txn-modal,
     .spents-modal,
     .quick-txn-modal,
-    .customer-amount-modal,
-    .budget-create-modal,
-    .budget-spent-modal,
-    .budget-limit-modal {
+    .customer-amount-modal {
         padding: 1.25rem;
     }
 
     .txn-modal h2,
-    .spents-modal h2,
-    .budget-create-modal h2 {
+    .spents-modal h2 {
         font-size: 1.2rem;
     }
 
@@ -2985,11 +3040,15 @@ select.txn-input option {
     font-family: var(--font-display, 'Rajdhani', sans-serif);
     color: var(--accent-red, #FF3D00);
     font-size: 1.5rem;
+    font-weight: 700;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid rgba(255, 61, 0, 0.3);
     padding-bottom: 0.75rem;
     text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
     letter-spacing: 0.1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .delete-confirm-warning {
