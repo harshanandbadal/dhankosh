@@ -16,9 +16,8 @@
 </head>
 
 <body>
-    <!-- Particle Background -->
-    <div class="particles-container" id="particlesContainer"></div>
 
+    <!-- Header -->
     <header class="header">
         <div class="header-left">
             <img src="../logo/DhanKosh-logo.png" alt="DhanKosh Logo" class="header-logo">
@@ -67,32 +66,44 @@
         </div>
     </header>
 
+    <!-- Quick Action Bar -->
     <div class="quick-action-bar">
 
+        <!-- Create Bank Buttons -->
         <button class="quick-action-btn bank-action" id="createBankBtn">
             <span class="action-icon">🏦</span>
             <span class="action-label">Create Bank</span>
         </button>
+
+        <!-- Create Credit Line Button -->
         <button class="quick-action-btn credit-action" id="createCreditBtn">
             <span class="action-icon">💳</span>
             <span class="action-label">Create Credit Line</span>
         </button>
+
+        <!-- Create Spents & Budgets Button -->
         <button class="quick-action-btn budget-action" id="setBudgetBtn">
             <span class="action-icon">📋</span>
-            <span class="action-label">Set Spents & Budgets</span>
+            <span class="action-label">Create Spents & Budgets</span>
         </button>
-        <button class="quick-action-btn" id="p2pBtn">
+
+        <!-- Create Customer Button -->
+        <button class="quick-action-btn customer-action" id="p2pBtn">
             <span class="action-icon">👥</span>
-            <span class="action-label">Add Customer</span>
+            <span class="action-label">Create Customer</span>
         </button>
+
+        <!-- Reset Dashboard Button -->
         <button class="quick-action-btn reset-btn" id="resetDashboardBtn">
             <span class="action-icon">🔄</span>
             <span class="action-label">Reset Dashboard</span>
         </button>
     </div>
 
+    <!-- Main Dashboard Grid -->
     <main class="dashboard-grid">
 
+        <!-- Available Balance Panel -->
         <div class="balance-wrapper">
             <section class="panel">
                 <div class="panel-header">
@@ -149,6 +160,7 @@
             </section>
         </div>
 
+        <!-- Bank Accounts Panel -->
         <section class="panel">
             <div class="panel-header">
                 <h2>Bank Accounts</h2>
@@ -160,6 +172,7 @@
             </div>
         </section>
 
+        <!-- Credit Lines Panel -->
         <section class="panel">
             <div class="panel-header">
                 <h2>Credit Lines</h2>
@@ -171,6 +184,7 @@
             </div>
         </section>
 
+        <!-- Spents & Budgets Panel -->
         <section class="panel">
             <div class="panel-header">
                 <h2>Future Spents & Budgets</h2>
@@ -182,6 +196,7 @@
             </div>
         </section>
 
+        <!-- Customers Panel -->
         <section class="panel">
             <div class="panel-header">
                 <h2>Customers</h2>
@@ -193,16 +208,18 @@
             </div>
         </section>
 
-        <section class="panel chart-panel" style="--accent-color: var(--accent-cyan);">
+        <!-- Net Growth Chart Panel -->
+        <section class="panel chart-panel">
             <div class="panel-header">
                 <h2>Net Growth (Recent 7 Days)</h2>
                 <span class="value cyan" id="netGrowthPercentage">+0.00%</span>
             </div>
-            <div class="panel-content chart-container" style="height: 300px; padding: 1rem;">
+            <div class="panel-content chart-container">
                 <canvas id="growthChart"></canvas>
             </div>
         </section>
 
+        <!-- Transaction History Panel -->
         <section class="panel">
             <div class="panel-header">
                 <h2>Transaction History</h2>
@@ -234,7 +251,135 @@
 
     </main>
 
-    <!-- Deposit Form -->
+    <!-- Bank Create Modal -->
+    <div class="bank-create-modal-overlay" id="bankCreateModalOverlay">
+        <div class="bank-create-modal" id="bankCreateModal">
+            <h2>[ Create Bank Account ]</h2>
+            <form id="bankCreateForm">
+                <div class="txn-form-group">
+                    <label for="bankName">BANK NAME</label>
+                    <input type="text" id="bankName" class="txn-input" placeholder="e.g., HDFC Bank..." required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="bankAccNo">LAST 4 DIGIT OF A/C NO.:</label>
+                    <input type="text" id="bankAccNo" class="txn-input" placeholder="e.g., 1234" maxlength="4" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="bankInitialAmount">INITIAL AMOUNT</label>
+                    <input type="number" id="bankInitialAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeBankCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Credit Create Modal -->
+    <div class="credit-create-modal-overlay" id="creditCreateModalOverlay">
+        <div class="credit-create-modal" id="creditCreateModal">
+            <h2>[ Create Credit Line ]</h2>
+            <form id="creditCreateForm">
+                <div class="txn-form-group">
+                    <label for="creditName">CREDIT CARD NAME</label>
+                    <input type="text" id="creditName" class="txn-input" placeholder="e.g., Amazon Pay ICICI..."
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditLast4">LAST 4 DIGIT OF CARD.:</label>
+                    <input type="text" id="creditLast4" class="txn-input" placeholder="e.g., 1234..." required
+                        maxlength="4">
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditLinked">LINKED</label>
+                    <select id="creditLinked" class="txn-input">
+                        <option value="">-- No link (Standalone) --</option>
+                        <!-- Existing cards to link with -->
+                    </select>
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditTotalLimit">TOTAL LIMIT</label>
+                    <input type="number" id="creditTotalLimit" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeCreditCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Spents & Budgets Modal -->
+    <div class="budget-create-modal-overlay" id="budgetCreateModalOverlay">
+        <div class="budget-create-modal" id="budgetCreateModal">
+            <h2>[ Create Budgets ]</h2>
+            <form id="budgetCreateForm">
+                <div class="txn-form-group">
+                    <label for="budgetName">BUDGET NAME</label>
+                    <input type="text" id="budgetName" class="txn-input" placeholder="e.g., Personal Monthly Budget..."
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="budgetTotalLimit">TOTAL LIMIT (INR)</label>
+                    <input type="number" id="budgetTotalLimit" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeBudgetCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Customer Modal -->
+    <div class="customer-modal-overlay" id="customerModalOverlay">
+        <div class="customer-modal" id="customerModal">
+            <h2>[ Create Customer ]</h2>
+            <form id="customerForm">
+                <div class="txn-form-group">
+                    <label for="customerPersonName">Customer Name</label>
+                    <input type="text" id="customerPersonName" class="txn-input" placeholder="Enter customer name..."
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="customerPhoneNumber">Phone Number</label>
+                    <input type="tel" id="customerPhoneNumber" class="txn-input" placeholder="Enter phone number..."
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeCustomerBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Dashboard Modal -->
+    <div class="reset-modal-overlay" id="resetModalOverlay">
+        <div class="reset-modal" id="resetModal">
+            <h2>[ RESET DASHBOARD ]</h2>
+            <div class="reset-warning">
+                <p>⚠ WARNING: This will clear all dashboard data</p>
+                <p>Enter your login password to confirm reset</p>
+            </div>
+            <form id="resetForm">
+                <div class="reset-form-group">
+                    <label for="resetPassword">Password</label>
+                    <input type="password" id="resetPassword" class="reset-input" placeholder="••••••••" required>
+                </div>
+                <div class="reset-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ CONFIRM RESET ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeResetBtn">[ CANCEL ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deposit Form Modal -->
     <div class="txn-modal-overlay" id="txnModalOverlay">
         <div class="txn-modal" id="txnModal">
             <h2>[ Deposit ]</h2>
@@ -282,7 +427,7 @@
         </div>
     </div>
 
-    <!-- Withdraw Form -->
+    <!-- Withdraw Form Modal -->
     <div class="spents-modal-overlay" id="spentsModalOverlay">
         <div class="spents-modal" id="spentsModal">
             <h2>[ Withdraw ]</h2>
@@ -360,24 +505,19 @@
         </div>
     </div>
 
-    <!-- Customer Transaction Modal -->
-    <div class="customer-modal-overlay" id="customerModalOverlay">
-        <div class="customer-modal" id="customerModal">
-            <h2>[ Add Customer ]</h2>
-            <form id="customerForm">
+    <!-- Target Amount Modal -->
+    <div class="txn-modal-overlay" id="targetModalOverlay">
+        <div class="txn-modal" id="targetModal">
+            <h2>[ Set Wealth Target ]</h2>
+            <form id="targetForm">
                 <div class="txn-form-group">
-                    <label for="customerPersonName">Customer Name</label>
-                    <input type="text" id="customerPersonName" class="txn-input" placeholder="Enter customer name..."
-                        required>
-                </div>
-                <div class="txn-form-group">
-                    <label for="customerPhoneNumber">Phone Number</label>
-                    <input type="tel" id="customerPhoneNumber" class="txn-input" placeholder="Enter phone number..."
+                    <label for="targetInputAmount">Target Amount (INR)</label>
+                    <input type="number" id="targetInputAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
                         required>
                 </div>
                 <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ Add ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeCustomerBtn">[ Cancel ]</button>
+                    <button type="submit" class="btn-terminal btn-submit">[ Save ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeTargetBtn">[ Cancel ]</button>
                 </div>
             </form>
         </div>
@@ -410,6 +550,24 @@
         </div>
     </div>
 
+    <!-- Budget Limit Increase Modal -->
+    <div class="budget-limit-modal-overlay" id="budgetLimitModalOverlay">
+        <div class="budget-limit-modal" id="budgetLimitModal">
+            <h2>[ Increase Limit ]</h2>
+            <form id="budgetLimitForm">
+                <div class="txn-form-group">
+                    <label for="budgetLimitIncrease">Increase By (INR)</label>
+                    <input type="number" id="budgetLimitIncrease" class="txn-input" placeholder="0.00" step="0.01"
+                        min="0" required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeBudgetLimitBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Customer Amount Modal (You Gave / You Got) -->
     <div class="customer-amount-modal-overlay" id="customerAmountModalOverlay">
         <div class="customer-amount-modal" id="customerAmountModal">
@@ -433,165 +591,6 @@
                     <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
                     <button type="button" class="btn-terminal btn-cancel" id="closeCustomerAmountBtn">[ Cancel
                         ]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Reset Dashboard Modal -->
-    <div class="reset-modal-overlay" id="resetModalOverlay">
-        <div class="reset-modal" id="resetModal">
-            <h2>[ RESET DASHBOARD ]</h2>
-            <div class="reset-warning">
-                <p>⚠ WARNING: This will clear all dashboard data</p>
-                <p>Enter your login password to confirm reset</p>
-            </div>
-            <form id="resetForm">
-                <div class="reset-form-group">
-                    <label for="resetPassword">Password</label>
-                    <input type="password" id="resetPassword" class="reset-input" placeholder="••••••••" required>
-                </div>
-                <div class="reset-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ CONFIRM RESET ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeResetBtn">[ CANCEL ]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Credit Create Modal -->
-    <div class="credit-create-modal-overlay" id="creditCreateModalOverlay">
-        <div class="credit-create-modal" id="creditCreateModal">
-            <h2>[ Create Credit Line ]</h2>
-            <form id="creditCreateForm">
-                <div class="txn-form-group">
-                    <label for="creditName">CREDIT CARD NAME</label>
-                    <input type="text" id="creditName" class="txn-input" placeholder="e.g., Amazon Pay ICICI..."
-                        required>
-                </div>
-                <div class="txn-form-group">
-                    <label for="creditLast4">LAST 4 DIGIT OF CARD.:</label>
-                    <input type="text" id="creditLast4" class="txn-input" placeholder="e.g., 1234..." required
-                        maxlength="4">
-                </div>
-                <div class="txn-form-group">
-                    <label for="creditLinked">LINKED</label>
-                    <select id="creditLinked" class="txn-input">
-                        <option value="">-- No link (Standalone) --</option>
-                        <!-- Existing cards to link with -->
-                    </select>
-                </div>
-                <div class="txn-form-group">
-                    <label for="creditTotalLimit">TOTAL LIMIT</label>
-                    <input type="number" id="creditTotalLimit" class="txn-input" placeholder="0.00" step="0.01" min="0"
-                        required>
-                </div>
-                <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeCreditCreateBtn">[ Cancel ]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Bank Create Modal -->
-    <div class="bank-create-modal-overlay" id="bankCreateModalOverlay">
-        <div class="bank-create-modal" id="bankCreateModal">
-            <h2>[ Create Bank Account ]</h2>
-            <form id="bankCreateForm">
-                <div class="txn-form-group">
-                    <label for="bankName">BANK NAME</label>
-                    <input type="text" id="bankName" class="txn-input" placeholder="e.g., HDFC Bank..." required>
-                </div>
-                <div class="txn-form-group">
-                    <label for="bankAccNo">LAST 4 DIGIT OF A/C NO.:</label>
-                    <input type="text" id="bankAccNo" class="txn-input" placeholder="e.g., 1234" maxlength="4" required>
-                </div>
-                <div class="txn-form-group">
-                    <label for="bankInitialAmount">INITIAL AMOUNT</label>
-                    <input type="number" id="bankInitialAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
-                        required>
-                </div>
-                <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeBankCreateBtn">[ Cancel ]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Target Amount Modal -->
-    <div class="txn-modal-overlay" id="targetModalOverlay">
-        <div class="txn-modal" id="targetModal">
-            <h2>[ Set Wealth Target ]</h2>
-            <form id="targetForm">
-                <div class="txn-form-group">
-                    <label for="targetInputAmount">Target Amount (INR)</label>
-                    <input type="number" id="targetInputAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
-                        required>
-                </div>
-                <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ Save ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeTargetBtn">[ Cancel ]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Budget Create Modal -->
-    <div class="budget-create-modal-overlay" id="budgetCreateModalOverlay">
-        <div class="budget-create-modal" id="budgetCreateModal">
-            <h2>[ Set Spents & Budgets ]</h2>
-            <form id="budgetCreateForm">
-                <div class="txn-form-group">
-                    <label for="budgetName">Name for Spents & Budgets</label>
-                    <input type="text" id="budgetName" class="txn-input" placeholder="e.g., Personal Monthly Budget..."
-                        required>
-                </div>
-                <div class="txn-form-group">
-                    <label for="budgetTotalLimit">Total Limit (INR)</label>
-                    <input type="number" id="budgetTotalLimit" class="txn-input" placeholder="0.00" step="0.01" min="0"
-                        required>
-                </div>
-                <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ SET ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeBudgetCreateBtn">[ Cancel ]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Budget Spent Modal -->
-    <div class="budget-spent-modal-overlay" id="budgetSpentModalOverlay">
-        <div class="budget-spent-modal" id="budgetSpentModal">
-            <h2 id="budgetSpentModalTitle">[ Record Spent ]</h2>
-            <form id="budgetSpentForm">
-                <div class="txn-form-group">
-                    <label for="budgetSpentAmount">Amount (INR)</label>
-                    <input type="number" id="budgetSpentAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
-                        required>
-                </div>
-                <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeBudgetSpentBtn">[ Cancel ]</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Budget Limit Increase Modal -->
-    <div class="budget-limit-modal-overlay" id="budgetLimitModalOverlay">
-        <div class="budget-limit-modal" id="budgetLimitModal">
-            <h2>[ Increase Limit ]</h2>
-            <form id="budgetLimitForm">
-                <div class="txn-form-group">
-                    <label for="budgetLimitIncrease">Increase By (INR)</label>
-                    <input type="number" id="budgetLimitIncrease" class="txn-input" placeholder="0.00" step="0.01"
-                        min="0" required>
-                </div>
-                <div class="txn-actions">
-                    <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
-                    <button type="button" class="btn-terminal btn-cancel" id="closeBudgetLimitBtn">[ Cancel ]</button>
                 </div>
             </form>
         </div>
