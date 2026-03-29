@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Statement - Dhankosh Terminal</title>
+    <link rel="icon" type="image/png" href="../logo/DhanKosh-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Rajdhani:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/print.css">
+</head>
+
+<body>
+    <!-- Setup Overlay -->
+    <div id="setupOverlay">
+        <div class="setup-modal">
+            <h3>[ SELECT ACCOUNT FOR STATEMENT ]</h3>
+            <form id="setupForm">
+                <select id="accountSelect" aria-label="Select account for statement" required>
+                    <option value="" disabled selected>-- Select Account --</option>
+                    <option value="ALL">-- All Accounts --</option>
+                    <!-- Options populated by JS -->
+                </select>
+                <select id="paymentDetailsSelect" aria-label="Select payment details filter">
+                    <option value="ALL" selected>-- All Payment Details --</option>
+                    <!-- Options populated by JS -->
+                </select>
+                <button type="submit" class="generate-btn">[ GENERATE STATEMENT ]</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="statementContent">
+        <button class="print-btn" onclick="window.print()">[ Print Document ]</button>
+
+        <div class="header">
+            <h1>DHANKOSH TERMINAL</h1>
+            <p>Financial Ledger Statement</p>
+            <p id="statementAccountFilter">
+                Account: ALL | Payment Details: ALL</p>
+        </div>
+
+        <div class="user-details">
+            <div><strong>AUTHORIZED USER:</strong> <span id="printUsername">SYSTEM</span></div>
+            <div><strong>TIMESTAMP:</strong> <span id="printDate"></span></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date of Execution</th>
+                    <th>Transaction ID</th>
+                    <th>Type</th>
+                    <th>Payment Details</th>
+                    <th>Account</th>
+                    <th class="amount">Amount (INR)</th>
+                    <th class="amount">Balance</th>
+                </tr>
+            </thead>
+            <tbody id="printTableBody">
+                <!-- Transactions dynamically injected here -->
+            </tbody>
+        </table>
+
+        <div class="summary">
+            <div>
+                TOTAL INFLOW
+                <span id="totalDeposits" class="pos">₹ 0.00</span>
+            </div>
+            <div>
+                TOTAL OUTFLOW
+                <span id="totalWithdrawals" class="neg">₹ 0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/print.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhankosh Terminal</title>
+    <link rel="icon" type="image/png" href="../logo/DhanKosh-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Rajdhani:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <img src="../logo/DhanKosh-logo.png" alt="DhanKosh Logo" class="header-logo">
+            <div>
+                <h1>DHANKOSH</h1>
+                <div class="header-subtitle">The Private Wealth Repository</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="status" id="systemStatus">
+                [ SYSTEM ACTIVE : SYSTEMS OFFLINE ]
+            </div>
+            <div class="notification-center">
+                <button class="notification-bell" id="notificationBell">
+                    <span class="bell-icon">🔔</span>
+                    <span class="notification-badge" id="notificationBadge">3</span>
+                </button>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        <h3>Notifications</h3>
+                        <button class="close-notifications" id="closeNotifications">×</button>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div class="notification-item">
+                            <div class="notification-title">Bank Accounts Updated</div>
+                            <div class="notification-time">2 minutes ago</div>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-title">Credit Card Payment Due</div>
+                            <div class="notification-time">5 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="notification-footer">
+                        <a href="#" id="viewAllNotifications">View All Notifications</a>
+                        <a href="#" id="clearNotifications">[ Clear All ]</a>
+                    </div>
+                </div>
+            </div>
+            <div class="user-info">
+                <div class="user-icon" id="userIcon">U</div>
+                <span id="username">User</span>
+                <button class="logout-btn" id="printStatementBtn" onclick="window.open('print.html', '_blank')">Print
+                    Statement</button>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Quick Action Bar -->
+    <div class="quick-action-bar">
+
+        <!-- Create Bank Buttons -->
+        <button class="quick-action-btn bank-action" id="createBankBtn">
+            <span class="action-icon">🏦</span>
+            <span class="action-label">Create Bank</span>
+        </button>
+
+        <!-- Create Credit Line Button -->
+        <button class="quick-action-btn credit-action" id="createCreditBtn">
+            <span class="action-icon">💳</span>
+            <span class="action-label">Create Credit Line</span>
+        </button>
+
+        <!-- Create Spents & Budgets Button -->
+        <button class="quick-action-btn budget-action" id="setBudgetBtn">
+            <span class="action-icon">📋</span>
+            <span class="action-label">Create Spents & Budgets</span>
+        </button>
+
+        <!-- Create Customer Button -->
+        <button class="quick-action-btn customer-action" id="p2pBtn">
+            <span class="action-icon">👥</span>
+            <span class="action-label">Create Customer</span>
+        </button>
+
+        <!-- Reset Dashboard Button -->
+        <button class="quick-action-btn reset-btn" id="resetDashboardBtn">
+            <span class="action-icon">🔄</span>
+            <span class="action-label">Reset Dashboard</span>
+        </button>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <main class="dashboard-grid">
+
+        <!-- Available Balance Panel -->
+        <div class="balance-wrapper">
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Available Balance</h2>
+                    <span class="value pos">TOTAL</span>
+                </div>
+                <div class="panel-content">
+                    <div class="balance-center">
+                        <div class="balance-label">NET WEALTH</div>
+                        <div class="balance-amount">₹ 0</div>
+                        <div class="balance-details">
+                            <div class="balance-flow">
+                                <div>
+                                    <div class="inflow-box">TOTAL AVAILABLE</div>
+                                    <div class="inflow-amount">+ ₹ 0</div>
+                                </div>
+                                <div class="outflow-box">
+                                    <div class="outflow-label">TOTAL SPENT</div>
+                                    <div class="outflow-amount">- ₹ 0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="balance-actions">
+                            <button class="quick-action-btn deposit-btn" id="addPaymentsBtn">
+                                <span class="action-icon">⚡</span>
+                                <span class="action-label">Deposit</span>
+                            </button>
+                            <button class="quick-action-btn withdraw-btn" id="spentsBtn">
+                                <span class="action-icon">💰</span>
+                                <span class="action-label">Withdraw</span>
+                            </button>
+                        </div>
+
+                        <!-- Net Wealth Target Box -->
+                        <div class="target-box">
+                            <div class="target-box-header">
+                                <span class="target-label">WEALTH TARGET</span>
+                                <button id="editTargetBtn">Set Target</button>
+                            </div>
+                            <div class="target-box-content">
+                                <div class="target-amount-section">
+                                    <div class="target-label-small">TARGET</div>
+                                    <div id="targetAmountDisplay">₹ 0</div>
+                                </div>
+                                <div class="target-required-section">
+                                    <div class="target-label-small">REQUIRED AMOUNT</div>
+                                    <div id="targetRequiredDisplay">₹ 0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Bank Accounts Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Bank Accounts</h2>
+                <span class="value pos" id="bankTotalCapital">CAPTIAL</span>
+            </div>
+            <div class="panel-content">
+                <div id="banksList" class="banks-list"></div>
+                <div id="noBanks" class="no-transactions">[ NO BANKS ADDED ]</div>
+            </div>
+        </section>
+
+        <!-- Credit Lines Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Credit Lines</h2>
+                <span class="value neg" id="creditTotalOutstanding">₹ 0</span>
+            </div>
+            <div class="panel-content">
+                <div id="creditList" class="credit-list"></div>
+                <div id="noCredit" class="no-transactions">[ NO CREDIT LINES ADDED ]</div>
+            </div>
+        </section>
+
+        <!-- Spents & Budgets Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Future Spents & Budgets</h2>
+                <span class="value neg" id="budgetTotalAvailable">₹ 0</span>
+            </div>
+            <div class="panel-content">
+                <div id="budgetsList" class="budgets-list"></div>
+                <div id="noBudgets" class="no-transactions">[ NO BUDGETS SET YET ]</div>
+            </div>
+        </section>
+
+        <!-- Customers Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Customers</h2>
+                <span class="value">MANUAL</span>
+            </div>
+            <div class="panel-content">
+                <div id="customersList" class="customers-list"></div>
+                <div id="noCustomers" class="no-transactions">[ NO CUSTOMERS YET ]</div>
+            </div>
+        </section>
+
+        <!-- Net Growth Chart Panel -->
+        <section class="panel chart-panel">
+            <div class="panel-header">
+                <h2>Net Growth (Recent 7 Days)</h2>
+                <span class="value cyan" id="netGrowthPercentage">+0.00%</span>
+            </div>
+            <div class="panel-content chart-container">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Transaction History Panel -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Transaction History</h2>
+                <span class="value">LEDGER</span>
+            </div>
+            <div class="panel-content">
+                <div class="txn-search-bar">
+                    <input type="text" id="txnSearchInput" class="txn-input" placeholder="Search history...">
+                    <span class="txn-search-icon">🔍</span>
+                </div>
+                <div class="transactions-wrapper">
+                    <div class="transactions-header">
+                        <div class="txn-col-date">Date of Execution</div>
+                        <div class="txn-col-id">Transaction ID</div>
+                        <div class="txn-col-type">Type</div>
+                        <div class="txn-col-amount">Amount (INR)</div>
+                        <div class="txn-col-purpose">Payments Details</div>
+                        <div class="txn-col-account">Account</div>
+                        <div class="txn-col-action">Action</div>
+                    </div>
+                    <div id="transactionsList" class="transactions-list">
+                    </div>
+                    <div id="noTransactions" class="no-transactions">
+                        [ NO TRANSACTIONS YET ]
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bank Create Modal -->
+    <div class="bank-create-modal-overlay" id="bankCreateModalOverlay">
+        <div class="bank-create-modal" id="bankCreateModal">
+            <h2>[ Create Bank Account ]</h2>
+            <form id="bankCreateForm">
+                <div class="txn-form-group">
+                    <label for="bankName">BANK NAME</label>
+                    <input type="text" id="bankName" class="txn-input" placeholder="e.g., HDFC Bank..." required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="bankAccNo">LAST 4 DIGIT OF A/C NO.:</label>
+                    <input type="text" id="bankAccNo" class="txn-input" placeholder="e.g., 1234" maxlength="4" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="bankInitialAmount">INITIAL AMOUNT</label>
+                    <input type="number" id="bankInitialAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeBankCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Credit Create Modal -->
+    <div class="credit-create-modal-overlay" id="creditCreateModalOverlay">
+        <div class="credit-create-modal" id="creditCreateModal">
+            <h2>[ Create Credit Line ]</h2>
+            <form id="creditCreateForm">
+                <div class="txn-form-group">
+                    <label for="creditName">CREDIT CARD NAME</label>
+                    <input type="text" id="creditName" class="txn-input" placeholder="e.g., Amazon Pay ICICI..."
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditLast4">LAST 4 DIGIT OF CARD.:</label>
+                    <input type="text" id="creditLast4" class="txn-input" placeholder="e.g., 1234..." required
+                        maxlength="4">
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditLinked">LINKED</label>
+                    <select id="creditLinked" class="txn-input">
+                        <option value="">-- No link (Standalone) --</option>
+                        <!-- Existing cards to link with -->
+                    </select>
+                </div>
+                <div class="txn-form-group">
+                    <label for="creditTotalLimit">TOTAL LIMIT</label>
+                    <input type="number" id="creditTotalLimit" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeCreditCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Spents & Budgets Modal -->
+    <div class="budget-create-modal-overlay" id="budgetCreateModalOverlay">
+        <div class="budget-create-modal" id="budgetCreateModal">
+            <h2>[ Create Budgets ]</h2>
+            <form id="budgetCreateForm">
+                <div class="txn-form-group">
+                    <label for="budgetName">BUDGET NAME</label>
+                    <input type="text" id="budgetName" class="txn-input" placeholder="e.g., Personal Monthly Budget..."
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="budgetTotalLimit">TOTAL LIMIT (INR)</label>
+                    <input type="number" id="budgetTotalLimit" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeBudgetCreateBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Customer Modal -->
+    <div class="customer-modal-overlay" id="customerModalOverlay">
+        <div class="customer-modal" id="customerModal">
+            <h2>[ Create Customer ]</h2>
+            <form id="customerForm">
+                <div class="txn-form-group">
+                    <label for="customerPersonName">Customer Name</label>
+                    <input type="text" id="customerPersonName" class="txn-input" placeholder="Enter customer name..."
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="customerPhoneNumber">Phone Number</label>
+                    <input type="tel" id="customerPhoneNumber" class="txn-input" placeholder="Enter phone number..."
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Create ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeCustomerBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset Dashboard Modal -->
+    <div class="reset-modal-overlay" id="resetModalOverlay">
+        <div class="reset-modal" id="resetModal">
+            <h2>[ RESET DASHBOARD ]</h2>
+            <div class="reset-warning">
+                <p>⚠ WARNING: This will clear all dashboard data</p>
+                <p>Enter your login password to confirm reset</p>
+            </div>
+            <form id="resetForm">
+                <div class="reset-form-group">
+                    <label for="resetPassword">Password</label>
+                    <input type="password" id="resetPassword" class="reset-input" placeholder="••••••••" required>
+                </div>
+                <div class="reset-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ CONFIRM RESET ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeResetBtn">[ CANCEL ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Deposit Form Modal -->
+    <div class="txn-modal-overlay" id="txnModalOverlay">
+        <div class="txn-modal" id="txnModal">
+            <h2>[ Deposit ]</h2>
+            <form id="txnForm">
+                <div class="txn-form-group">
+                    <label for="txnDate">Date of Execution</label>
+                    <input type="date" id="txnDate" class="txn-input" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="txnAmount">Amount (INR)</label>
+                    <input type="number" id="txnAmount" class="txn-input" placeholder="0.00" step="0.01" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="txnPurpose">Payments Details</label>
+                    <select id="txnPurpose" class="txn-input" required>
+                        <option value="" disabled selected>-- Select Purpose --</option>
+                        <option value="billpayments">Bill Payments [Credit Lines]</option>
+                        <option value="deposit">Deposit [Bank Accounts]</option>
+
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+                <div class="txn-form-group" id="customPurposeGroup">
+                    <label for="txnCustomPurpose">Specify Details</label>
+                    <input type="text" id="txnCustomPurpose" class="txn-input" placeholder="e.g., Cashback & Refunds">
+                </div>
+                <div class="txn-form-group">
+                    <label for="txnOrigin">Destination Account</label>
+                    <select id="txnOrigin" class="txn-input" required disabled>
+                        <option value="" disabled selected>-- Select Destination Account --</option>
+                        <optgroup label="Bank Accounts" id="opt-liquid">
+                            <!-- Dynamically populated -->
+                        </optgroup>
+                        <optgroup label="Credit Lines" id="opt-credit">
+                            <!-- Dynamically populated -->
+                        </optgroup>
+
+                    </select>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Update ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeTxnBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withdraw Form Modal -->
+    <div class="spents-modal-overlay" id="spentsModalOverlay">
+        <div class="spents-modal" id="spentsModal">
+            <h2>[ Withdraw ]</h2>
+            <form id="spentsForm">
+                <div class="txn-form-group">
+                    <label for="spentsDate">Date of Execution</label>
+                    <input type="date" id="spentsDate" class="txn-input" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="spentsAmount">Amount (INR)</label>
+                    <input type="number" id="spentsAmount" class="txn-input" placeholder="0.00" step="0.01" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="paymentsdetails">Payments Details</label>
+                    <select id="paymentsdetails" class="txn-input" required>
+                        <option value="" disabled selected>-- Select Purpose --</option>
+                        <optgroup label="Budgets" id="budgetOptionsGroup">
+                            <!-- Dynamically populated from budgets -->
+                        </optgroup>
+                        <optgroup label="Transfers">
+                            <option value="transfer_to_bank">Transfer To Bank</option>
+                            <option value="upi_transfer">UPI Transfer</option>
+                        </optgroup>
+                        <optgroup label="Shopping">
+                            <option value="amazon_purchase">Amazon Purchase</option>
+                            <option value="flipkart_purchase">Flipkart Purchase</option>
+                            <option value="myntra_purchase">Myntra Purchase</option>
+                            <option value="online_shopping">Other Online Shopping</option>
+                            <option value="offline_shopping">Offline Shopping</option>
+                        </optgroup>
+                        <optgroup label="Food & Grocery">
+                            <option value="food_delivery">Food Delivery (Zomato/Swiggy)</option>
+                            <option value="grocery">Grocery (Blinkit/Zepto)</option>
+                            <option value="dining_out">Dining Out</option>
+                        </optgroup>
+                        <optgroup label="Bills & Utilities">
+                            <option value="recharge">Recharge & Bill Payments</option>
+                            <option value="emi">EMI Payment</option>
+                            <option value="rent">Rent</option>
+                            <option value="electricity">Electricity Bill</option>
+                            <option value="subscription">Subscription (Netflix/Spotify)</option>
+                        </optgroup>
+                        <optgroup label="Lifestyle">
+                            <option value="medical">Medical & Healthcare</option>
+                            <option value="travel">Travel & Transport</option>
+                            <option value="education">Education & Books</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="personal_care">Personal Care</option>
+                        </optgroup>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+                <div class="txn-form-group" id="spentsCustomPurposeGroup">
+                    <label for="spentsCustomPurpose">Specify Details</label>
+                    <input type="text" id="spentsCustomPurpose" class="txn-input"
+                        placeholder="e.g., Movie tickets, Zomato...">
+                </div>
+                <div class="txn-form-group">
+                    <label for="spentsBank">Mode of Payment</label>
+                    <select id="spentsBank" class="txn-input" required>
+                        <option value="" disabled selected>-- Select Mode of Payment --</option>
+                        <optgroup label="Bank Accounts" id="spents-opt-liquid">
+                            <!-- Dynamically populated -->
+                        </optgroup>
+                        <optgroup label="Credit Lines" id="spents-opt-credit">
+                            <!-- Dynamically populated -->
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Update ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeSpentsBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Target Amount Modal -->
+    <div class="txn-modal-overlay" id="targetModalOverlay">
+        <div class="txn-modal" id="targetModal">
+            <h2>[ Set Wealth Target ]</h2>
+            <form id="targetForm">
+                <div class="txn-form-group">
+                    <label for="targetInputAmount">Target Amount (INR)</label>
+                    <input type="number" id="targetInputAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Save ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeTargetBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Bank Transaction Modal -->
+    <div class="quick-txn-modal-overlay" id="quickTxnModalOverlay">
+        <div class="quick-txn-modal" id="quickTxnModal">
+            <h2 id="quickTxnModalTitle">[ Quick Deposit ]</h2>
+            <form id="quickTxnForm">
+                <div class="txn-form-group">
+                    <label for="quickTxnDate">Date of Execution</label>
+                    <input type="date" id="quickTxnDate" class="txn-input" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="quickTxnAmount">Amount (INR)</label>
+                    <input type="number" id="quickTxnAmount" class="txn-input" placeholder="0.00" step="0.01" min="0"
+                        required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="quickTxnDescription">Description (Optional)</label>
+                    <input type="text" id="quickTxnDescription" class="txn-input"
+                        placeholder="e.g., Salary, ATM Withdrawal...">
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeQuickTxnBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Limit Increase Modal -->
+    <div class="budget-limit-modal-overlay" id="budgetLimitModalOverlay">
+        <div class="budget-limit-modal" id="budgetLimitModal">
+            <h2>[ Increase Limit ]</h2>
+            <form id="budgetLimitForm">
+                <div class="txn-form-group">
+                    <label for="budgetLimitIncrease">Increase By (INR)</label>
+                    <input type="number" id="budgetLimitIncrease" class="txn-input" placeholder="0.00" step="0.01"
+                        min="0" required>
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeBudgetLimitBtn">[ Cancel ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Customer Amount Modal (You Gave / You Got) -->
+    <div class="customer-amount-modal-overlay" id="customerAmountModalOverlay">
+        <div class="customer-amount-modal" id="customerAmountModal">
+            <h2 id="customerAmountModalTitle">[ You Gave ]</h2>
+            <form id="customerAmountForm">
+                <div class="txn-form-group">
+                    <label for="customerAmountDate">Date of Execution</label>
+                    <input type="date" id="customerAmountDate" class="txn-input" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="customerAmountValue">Amount (INR)</label>
+                    <input type="number" id="customerAmountValue" class="txn-input" placeholder="0.00" step="0.01"
+                        min="0" required>
+                </div>
+                <div class="txn-form-group">
+                    <label for="customerAmountDescription">Description (Optional)</label>
+                    <input type="text" id="customerAmountDescription" class="txn-input"
+                        placeholder="e.g., Loan, Payment...">
+                </div>
+                <div class="txn-actions">
+                    <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
+                    <button type="button" class="btn-terminal btn-cancel" id="closeCustomerAmountBtn">[ Cancel
+                        ]</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="delete-confirm-overlay" id="deleteConfirmOverlay">
+        <div class="delete-confirm-modal" id="deleteConfirmModal">
+            <div class="delete-confirm-icon">⚠</div>
+            <h2>[ CONFIRM DELETE ]</h2>
+            <div class="delete-confirm-warning">
+                <p id="deleteConfirmMessage">Are you sure you want to delete this item?</p>
+                <p class="delete-confirm-sub">This action cannot be undone.</p>
+            </div>
+            <div class="delete-confirm-actions">
+                <button class="btn-terminal btn-submit delete-confirm-yes" id="deleteConfirmYes">[ DELETE ]</button>
+                <button class="btn-terminal btn-cancel delete-confirm-no" id="deleteConfirmNo">[ CANCEL ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="../js/script.js"></script>
+
+</body>
+
+</html>
