@@ -327,9 +327,11 @@ function formatDate(dateStr) {
   return `${d}/${m}/${y}`;
 }
 
+let _idSeq = 0;
 function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  return Date.now().toString(36) + (++_idSeq).toString(36) + Math.random().toString(36).slice(2, 5);
 }
+
 
 function today() {
   return new Date().toISOString().split('T')[0];
@@ -400,6 +402,7 @@ function renderBanks() {
 function populateBankDropdowns() {
   const optLiquid = document.getElementById('opt-liquid');
   const spentsOptLiquid = document.getElementById('spents-opt-liquid');
+  const customerOptLiquid = document.getElementById('customer-opt-liquid');
 
   if (optLiquid) {
     optLiquid.innerHTML = '';
@@ -418,6 +421,16 @@ function populateBankDropdowns() {
       opt.value = bank.id;
       opt.textContent = `${bank.name} (${bank.accNo})`;
       spentsOptLiquid.appendChild(opt);
+    });
+  }
+
+  if (customerOptLiquid) {
+    customerOptLiquid.innerHTML = '';
+    state.banks.forEach(bank => {
+      const opt = document.createElement('option');
+      opt.value = bank.id;
+      opt.textContent = `${bank.name} (${bank.accNo})`;
+      customerOptLiquid.appendChild(opt);
     });
   }
 }
@@ -556,6 +569,7 @@ function renderCredit() {
 function populateCreditDropdowns() {
   const optCredit = document.getElementById('opt-credit');
   const spentsOptCredit = document.getElementById('spents-opt-credit');
+  const customerOptCredit = document.getElementById('customer-opt-credit');
   const linkedSel = document.getElementById('creditLinked');
 
   if (optCredit) {
@@ -575,6 +589,16 @@ function populateCreditDropdowns() {
       opt.value = card.id;
       opt.textContent = `${card.name} (${card.last4})`;
       spentsOptCredit.appendChild(opt);
+    });
+  }
+
+  if (customerOptCredit) {
+    customerOptCredit.innerHTML = '';
+    state.credit.forEach(card => {
+      const opt = document.createElement('option');
+      opt.value = card.id;
+      opt.textContent = `${card.name} (${card.last4})`;
+      customerOptCredit.appendChild(opt);
     });
   }
 
@@ -1679,6 +1703,7 @@ function initCustomerAmountModals() {
       const date = document.getElementById('customerAmountDate').value;
       const amount = parseFloat(document.getElementById('customerAmountValue').value);
       const description = document.getElementById('customerAmountDescription').value.trim();
+      const accountKey = document.getElementById('customerAmountAccount')?.value || '';
 
       if (!date) {
         showFormError(form, 'Please select a date.');
@@ -1692,9 +1717,13 @@ function initCustomerAmountModals() {
 
       const customer = state.customers.find(c => c.id === currentCustomerId);
       if (customer) {
+        // ── Resolve selected account label ──────────────────
+        const accountLabel = accountKey ? getAccountLabel(accountKey) : '';
+
         if (currentCustomerAmountType === 'youGave') {
           customer.youGave = (customer.youGave || 0) + amount;
 
+          // 1. Customer-side transaction (tracks what you gave the customer)
           state.transactions.push({
             id: generateId(),
             date: date,
@@ -1706,10 +1735,28 @@ function initCustomerAmountModals() {
             _ts: Date.now(),
           });
 
+          // 2. Account-side transaction (money left your account)
+          if (accountKey) {
+            const bank = state.banks.find(b => b.id === accountKey);
+            if (bank) bank.balance -= amount; // deduct from bank balance
+
+            state.transactions.push({
+              id: generateId(),
+              date: date,
+              type: 'WITHDRAWAL',
+              purpose: `You Gave - ${customer.name}${description ? ' - ' + description : ''}`,
+              account: accountLabel,
+              amount: amount,
+              sign: '-',
+              _ts: Date.now(),
+            });
+          }
+
           addNotification(`You Gave ₹${formatINR(amount)}${description ? ' - ' + description : ''}`);
         } else if (currentCustomerAmountType === 'youGot') {
           customer.youGot = (customer.youGot || 0) + amount;
 
+          // 1. Customer-side transaction (tracks what you received from the customer)
           state.transactions.push({
             id: generateId(),
             date: date,
@@ -1720,6 +1767,23 @@ function initCustomerAmountModals() {
             sign: '-',
             _ts: Date.now(),
           });
+
+          // 2. Account-side transaction (money entered your account)
+          if (accountKey) {
+            const bank = state.banks.find(b => b.id === accountKey);
+            if (bank) bank.balance += amount; // add to bank balance
+
+            state.transactions.push({
+              id: generateId(),
+              date: date,
+              type: 'DEPOSIT',
+              purpose: `You Got - ${customer.name}${description ? ' - ' + description : ''}`,
+              account: accountLabel,
+              amount: amount,
+              sign: '+',
+              _ts: Date.now(),
+            });
+          }
 
           addNotification(`You Got ₹${formatINR(amount)}${description ? ' - ' + description : ''}`);
         }

@@ -587,6 +587,18 @@
                     <input type="text" id="customerAmountDescription" class="txn-input"
                         placeholder="e.g., Loan, Payment...">
                 </div>
+                <div class="txn-form-group">
+                    <label for="customerAmountAccount">Account</label>
+                    <select id="customerAmountAccount" class="txn-input">
+                        <option value="">-- No Account (Cash) --</option>
+                        <optgroup label="Bank Accounts" id="customer-opt-liquid">
+                            <!-- Dynamically populated -->
+                        </optgroup>
+                        <optgroup label="Credit Lines" id="customer-opt-credit">
+                            <!-- Dynamically populated -->
+                        </optgroup>
+                    </select>
+                </div>
                 <div class="txn-actions">
                     <button type="submit" class="btn-terminal btn-submit">[ Confirm ]</button>
                     <button type="button" class="btn-terminal btn-cancel" id="closeCustomerAmountBtn">[ Cancel

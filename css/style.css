@@ -1785,7 +1785,6 @@ h3 {
 .txn-modal-overlay.active .txn-modal,
 .quick-txn-modal-overlay.active .quick-txn-modal,
 .customer-amount-modal-overlay.active .customer-amount-modal,
-.reset-modal-overlay.active .reset-modal,
 .spents-modal-overlay.active .spents-modal,
 .customer-modal-overlay.active .customer-modal,
 .budget-create-modal-overlay.active .budget-create-modal,
@@ -1794,6 +1793,25 @@ h3 {
 .credit-create-modal-overlay.active .credit-create-modal,
 .bank-create-modal-overlay.active .bank-create-modal {
     transform: translateY(0);
+}
+
+/* Reset modal: slide up + vibrate on appearance */
+@keyframes modalVibrate {
+    0%   { transform: translateY(20px) translateX(0); }
+    10%  { transform: translateY(5px)  translateX(-6px); }
+    20%  { transform: translateY(2px)  translateX(6px); }
+    30%  { transform: translateY(0)    translateX(-5px); }
+    40%  { transform: translateY(0)    translateX(5px); }
+    50%  { transform: translateY(0)    translateX(-4px); }
+    60%  { transform: translateY(0)    translateX(4px); }
+    70%  { transform: translateY(0)    translateX(-2px); }
+    80%  { transform: translateY(0)    translateX(2px); }
+    90%  { transform: translateY(0)    translateX(-1px); }
+    100% { transform: translateY(0)    translateX(0); }
+}
+
+.reset-modal-overlay.active .reset-modal {
+    animation: modalVibrate 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .txn-modal h2,
