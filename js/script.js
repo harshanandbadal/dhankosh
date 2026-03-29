@@ -1123,14 +1123,47 @@ function renderAll() {
 
 // ─── NOTIFICATIONS ────────────────────────────────────────
 
+function getNotifIcon(title) {
+  const t = (title || '').toLowerCase();
+  if (t.includes('deposit') || t.includes('you got') || t.includes('initial amount')) return '⬆️';
+  if (t.includes('withdraw') || t.includes('spent') || t.includes('you gave')) return '⬇️';
+  if (t.includes('bank') && t.includes('creat')) return '🏦';
+  if (t.includes('credit') && (t.includes('creat') || t.includes('remov'))) return '💳';
+  if (t.includes('customer')) return '👤';
+  if (t.includes('budget')) return '📋';
+  if (t.includes('delet') || t.includes('remov')) return '🗑️';
+  if (t.includes('target')) return '🎯';
+  if (t.includes('reset')) return '🔄';
+  if (t.includes('transfer')) return '↔️';
+  if (t.includes('bill') || t.includes('payment')) return '📄';
+  return '📌';
+}
+
+function getRelativeTime(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hr ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days} days ago`;
+  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+}
+
 function addNotification(title) {
   const notif = {
     id: generateId(),
     title,
+    icon: getNotifIcon(title),
+    iso: new Date().toISOString(),
+    // legacy time field kept for old saved notifications
     time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
   };
   state.notifications.unshift(notif);
-  if (state.notifications.length > 50) state.notifications.pop();
+  if (state.notifications.length > 100) state.notifications.pop();
   saveState();
   renderNotifications();
 }
@@ -1138,37 +1171,57 @@ function addNotification(title) {
 function renderNotifications() {
   const list = document.getElementById('notificationList');
   const badge = document.getElementById('notificationBadge');
-  const footerLink = document.getElementById('viewAllNotifications');
+  const countEl = document.getElementById('notificationCount');
   if (!list) return;
 
+  const total = state.notifications.length;
   const isExpanded = list.dataset.expanded === 'true';
-  const limit = isExpanded ? state.notifications.length : 5;
+  const limit = isExpanded ? total : 8;
   const items = state.notifications.slice(0, limit);
 
-  // Toggle footer link visibility
-  if (footerLink && footerLink.parentElement) {
-    if (state.notifications.length <= 5 || isExpanded) {
-      footerLink.parentElement.style.display = 'none';
-    } else {
-      footerLink.parentElement.style.display = 'block';
+  if (total === 0) {
+    list.innerHTML = '<div style="padding:1.2rem 1rem; color:var(--text-muted); font-size:0.85rem; text-align:center; letter-spacing:0.05em;">[ NO ACTIVITY YET ]</div>';
+  } else {
+    list.innerHTML = items.map(n => {
+      const icon = n.icon || getNotifIcon(n.title);
+      const timeDisplay = n.iso ? getRelativeTime(n.iso) : (n.time || '');
+      return `
+        <div class="notification-item">
+          <span class="notif-icon">${icon}</span>
+          <div class="notif-body">
+            <div class="notification-title">${escapeHtml(n.title)}</div>
+            <div class="notification-time">${timeDisplay}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Show "load more" hint if collapsed and there are more
+    if (!isExpanded && total > 8) {
+      list.innerHTML += `<div class="notif-load-more" id="notifLoadMore">▼ ${total - 8} more — click to expand</div>`;
+      const loadMore = document.getElementById('notifLoadMore');
+      if (loadMore) loadMore.addEventListener('click', () => {
+        list.dataset.expanded = 'true';
+        renderNotifications();
+      });
+    } else if (isExpanded && total > 8) {
+      list.innerHTML += `<div class="notif-load-more" id="notifLoadMore">▲ Collapse</div>`;
+      const collapseBtn = document.getElementById('notifLoadMore');
+      if (collapseBtn) collapseBtn.addEventListener('click', () => {
+        list.dataset.expanded = 'false';
+        renderNotifications();
+      });
     }
   }
 
-  if (state.notifications.length === 0) {
-    list.innerHTML = '<div style="padding:1rem; color:var(--text-muted); font-size:0.85rem; text-align:center;">[ NO NOTIFICATIONS ]</div>';
-  } else {
-    list.innerHTML = items.map(n => `
-      <div class="notification-item">
-        <div class="notification-title">${escapeHtml(n.title)}</div>
-        <div class="notification-time">${escapeHtml(n.time)}</div>
-      </div>
-    `).join('');
+  // Update badge
+  if (badge) {
+    badge.textContent = total > 99 ? '99+' : total;
+    badge.style.display = total > 0 ? 'flex' : 'none';
   }
 
-  if (badge) {
-    const unreadCount = state.notifications.length;
-    badge.textContent = unreadCount;
-    badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+  // Update footer count
+  if (countEl) {
+    countEl.textContent = total === 0 ? '0 events' : `${total} event${total !== 1 ? 's' : ''}`;
   }
 }
 
@@ -1752,7 +1805,7 @@ function initCustomerAmountModals() {
             });
           }
 
-          addNotification(`You Gave ₹${formatINR(amount)}${description ? ' - ' + description : ''}`);
+          addNotification(`You Gave ${formatINR(amount)}${description ? ' - ' + description : ''}`);
         } else if (currentCustomerAmountType === 'youGot') {
           customer.youGot = (customer.youGot || 0) + amount;
 
@@ -1785,7 +1838,7 @@ function initCustomerAmountModals() {
             });
           }
 
-          addNotification(`You Got ₹${formatINR(amount)}${description ? ' - ' + description : ''}`);
+          addNotification(`You Got ${formatINR(amount)}${description ? ' - ' + description : ''}`);
         }
 
         saveState();
@@ -2305,45 +2358,33 @@ function initNotifications() {
 
   if (!bell || !dropdown) return;
 
+  // Toggle dropdown on bell click
   bell.addEventListener('click', e => {
     e.stopPropagation();
     dropdown.classList.toggle('active');
   });
 
+  // Close button
   if (closeBtn) closeBtn.addEventListener('click', () => {
     dropdown.classList.remove('active');
   });
 
+  // Click outside to close
   document.addEventListener('click', e => {
     if (!dropdown.contains(e.target) && e.target !== bell) {
       dropdown.classList.remove('active');
     }
   });
 
-  const viewAll = document.getElementById('viewAllNotifications');
-  if (viewAll) viewAll.addEventListener('click', e => {
-    e.preventDefault();
-    e.stopPropagation();
-    const list = document.getElementById('notificationList');
-    if (list) {
-      list.dataset.expanded = 'true';
-      renderNotifications();
-    }
-  });
-
+  // Clear all
   const clearAll = document.getElementById('clearNotifications');
   if (clearAll) clearAll.addEventListener('click', e => {
     e.preventDefault();
     e.stopPropagation();
     state.notifications = [];
     saveState();
-
-    // Reset view bounds as well
     const list = document.getElementById('notificationList');
-    if (list) {
-      list.dataset.expanded = 'false';
-    }
-
+    if (list) list.dataset.expanded = 'false';
     renderNotifications();
   });
 }

@@ -33,25 +33,18 @@
             <div class="notification-center">
                 <button class="notification-bell" id="notificationBell">
                     <span class="bell-icon">🔔</span>
-                    <span class="notification-badge" id="notificationBadge">3</span>
+                    <span class="notification-badge" id="notificationBadge" style="display:none">0</span>
                 </button>
                 <div class="notification-dropdown" id="notificationDropdown">
                     <div class="notification-header">
-                        <h3>Notifications</h3>
+                        <h3>⚡ Activity Log</h3>
                         <button class="close-notifications" id="closeNotifications">×</button>
                     </div>
                     <div class="notification-list" id="notificationList">
-                        <div class="notification-item">
-                            <div class="notification-title">Bank Accounts Updated</div>
-                            <div class="notification-time">2 minutes ago</div>
-                        </div>
-                        <div class="notification-item">
-                            <div class="notification-title">Credit Card Payment Due</div>
-                            <div class="notification-time">5 hours ago</div>
-                        </div>
+                        <div style="padding:1rem; color:var(--text-muted); font-size:0.85rem; text-align:center;">[ NO NOTIFICATIONS ]</div>
                     </div>
                     <div class="notification-footer">
-                        <a href="#" id="viewAllNotifications">View All Notifications</a>
+                        <span id="notificationCount" style="color:var(--text-muted);font-size:0.8rem;">0 events</span>
                         <a href="#" id="clearNotifications">[ Clear All ]</a>
                     </div>
                 </div>
