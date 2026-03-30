@@ -1125,11 +1125,11 @@ function renderAll() {
 
 function getNotifIcon(title) {
   const t = (title || '').toLowerCase();
-  if (t.includes('deposit') || t.includes('you got') || t.includes('initial amount')) return '⬆️';
-  if (t.includes('withdraw') || t.includes('spent') || t.includes('you gave')) return '⬇️';
+  if (t.includes('deposit') || t.includes('you got') || t.includes('initial amount')) return '⬇️';
+  if (t.includes('withdraw') || t.includes('spent') || t.includes('you gave')) return '⬆️';
   if (t.includes('bank') && t.includes('creat')) return '🏦';
   if (t.includes('credit') && (t.includes('creat') || t.includes('remov'))) return '💳';
-  if (t.includes('customer')) return '👤';
+  if (t.includes('customer')) return '👥';
   if (t.includes('budget')) return '📋';
   if (t.includes('delet') || t.includes('remov')) return '🗑️';
   if (t.includes('target')) return '🎯';
@@ -1189,7 +1189,7 @@ function renderNotifications() {
         <div class="notification-item">
           <span class="notif-icon">${icon}</span>
           <div class="notif-body">
-            <div class="notification-title">${escapeHtml(n.title)}</div>
+            <div class="notification-title" title="${escapeHtml(n.title)}">${escapeHtml(n.title)}</div>
             <div class="notification-time">${timeDisplay}</div>
           </div>
         </div>`;
@@ -1424,7 +1424,7 @@ function initAddPaymentsModal() {
     saveState();
 
     renderAll();
-    addNotification(`${purposeLabel} — ${formatINR(amount)}`);
+    addNotification(`${purposeLabel}: ${formatINR(amount)} - ${accountLabel}`);
     closeModal('txnModalOverlay');
     form.reset();
     if (customGroup) customGroup.classList.remove('visible');
@@ -1592,7 +1592,7 @@ function initSpentsModal() {
     saveState();
 
     renderAll();
-    addNotification(`Spent ${formatINR(amount)} on ${categoryLabel}`);
+    addNotification(`Withdraw: ${formatINR(amount)} - ${bankLabel}`);
     closeModal('spentsModalOverlay');
     form.reset();
     if (customGroup) customGroup.classList.remove('visible');
@@ -1645,7 +1645,7 @@ function initCustomerModal() {
     state.customers.push(customer);
     saveState();
     renderCustomers();
-    addNotification(`Customer added: ${name}`);
+    addNotification(`Customer Created: ${name}`);
     closeModal('customerModalOverlay');
     form.reset();
   });
@@ -1805,7 +1805,10 @@ function initCustomerAmountModals() {
             });
           }
 
-          addNotification(`You Gave ${formatINR(amount)}${description ? ' - ' + description : ''}`);
+          addNotification(`You Gave: ${formatINR(amount)} - ${customer.name}`);
+          if (accountKey) {
+            addNotification(`Withdraw: ${formatINR(amount)} - ${accountLabel}`);
+          }
         } else if (currentCustomerAmountType === 'youGot') {
           customer.youGot = (customer.youGot || 0) + amount;
 
@@ -1838,13 +1841,14 @@ function initCustomerAmountModals() {
             });
           }
 
-          addNotification(`You Got ${formatINR(amount)}${description ? ' - ' + description : ''}`);
+          addNotification(`You Got: ${formatINR(amount)} - ${customer.name}`);
+          if (accountKey) {
+            addNotification(`Deposit: ${formatINR(amount)} - ${accountLabel}`);
+          }
         }
 
         saveState();
-        renderCustomers();
-        renderTransactions();
-        renderNetWealth();
+        renderAll();
         closeModal('customerAmountModalOverlay');
         form.reset();
       }
@@ -1937,7 +1941,7 @@ function initResetModal() {
       saveState();
 
       renderAll();
-      addNotification('Dashboard has been reset');
+      addNotification('DASHBOARD HAS BEEN RESET');
       closeModal('resetModalOverlay');
       form.reset();
 
@@ -2011,8 +2015,8 @@ function initBudgetCreateModal() {
 
     state.budgets.push(budget);
     saveState();
-    renderBudgets();
-    addNotification(`Budget added: ${name}`);
+    renderAll();
+    addNotification(`Spents & Budgets Created: ${name}`);
     closeModal('budgetCreateModalOverlay');
     form.reset();
   });
@@ -2180,7 +2184,7 @@ function initBankCreateModal() {
     renderBanks();
     renderTransactions();
     renderNetWealth();
-    addNotification(`Bank created: ${name}`);
+    addNotification(`Bank Created: ${name}`);
     closeModal('bankCreateModalOverlay');
     form.reset();
   });
@@ -2242,7 +2246,7 @@ function initCreditCreateModal() {
     saveState();
     renderCredit();
     renderNetWealth();
-    addNotification(`Credit line created: ${name}`);
+    addNotification(`Credit Line Created: ${name}`);
     closeModal('creditCreateModalOverlay');
     form.reset();
   });
@@ -2343,7 +2347,7 @@ function initQuickTxnForm() {
 
     saveState();
     renderAll();
-    addNotification(`${action === 'deposit' ? 'Deposit' : 'Withdrawal'} of ₹ ${formatINR(amount).replace('₹ ', '')} recorded`);
+    addNotification(`${action === 'deposit' ? 'Deposit' : 'Withdraw'}: ${formatINR(amount)} - ${accountLabel}`);
     closeModal('quickTxnModalOverlay');
     form.reset();
   });
