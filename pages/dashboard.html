@@ -220,8 +220,9 @@
             </div>
             <div class="panel-content">
                 <div class="txn-search-bar">
-                    <input type="text" id="txnSearchInput" class="txn-input" placeholder="Search history...">
+                    <input type="text" id="txnSearchInput" class="txn-input" placeholder="Search history..." style="padding-right: 3rem;">
                     <span class="txn-search-icon">🔍</span>
+                    <button id="txnPrintBtn" title="Print Search Results" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; font-size: 1.3rem; cursor: pointer; transition: transform 0.2s;">🖨️</button>
                 </div>
                 <div class="transactions-wrapper">
                     <div class="transactions-header">
@@ -230,6 +231,7 @@
                         <div class="txn-col-type">Type</div>
                         <div class="txn-col-amount">Amount (INR)</div>
                         <div class="txn-col-purpose">Payments Details</div>
+                        <div class="txn-col-remark">Remark</div>
                         <div class="txn-col-account">Account</div>
                         <div class="txn-col-action">Action</div>
                     </div>
@@ -390,14 +392,23 @@
                     <select id="txnPurpose" class="txn-input" required>
                         <option value="" disabled selected>-- Select Purpose --</option>
                         <option value="billpayments">Bill Payments [Credit Lines]</option>
-                        <option value="deposit">Deposit [Bank Accounts]</option>
-
+                        <option value="cashback">Cashback</option>
+                        <option value="deposits">Deposits [Bank Accounts]</option>
+                        <option value="gifts_allowances">Gifts & Allowances</option>
+                        <option value="interest">Interest [Bank Accounts]</option>
+                        <option value="refunds">Refunds</option>
+                        <option value="salary">Salary [Bank Accounts]</option>
+                        <option value="self_transfer">Self-Transfer [Bank Accounts]</option>
                         <option value="others">Others</option>
                     </select>
                 </div>
                 <div class="txn-form-group" id="customPurposeGroup">
                     <label for="txnCustomPurpose">Specify Details</label>
-                    <input type="text" id="txnCustomPurpose" class="txn-input" placeholder="e.g., Cashback & Refunds">
+                    <input type="text" id="txnCustomPurpose" class="txn-input" placeholder="e.g., Freelancing Income">
+                </div>
+                <div class="txn-form-group">
+                    <label for="txnRemark">Remark (Optional)</label>
+                    <input type="text" id="txnRemark" class="txn-input" placeholder="e.g., Note about this deposit">
                 </div>
                 <div class="txn-form-group">
                     <label for="txnOrigin">Destination Account</label>
@@ -437,47 +448,60 @@
                     <label for="paymentsdetails">Payments Details</label>
                     <select id="paymentsdetails" class="txn-input" required>
                         <option value="" disabled selected>-- Select Purpose --</option>
+                        
                         <optgroup label="Budgets" id="budgetOptionsGroup">
                             <!-- Dynamically populated from budgets -->
                         </optgroup>
+
                         <optgroup label="Transfers">
                             <option value="transfer_to_bank">Transfer To Bank</option>
                             <option value="upi_transfer">UPI Transfer</option>
                         </optgroup>
+
+                        <optgroup label="Bills & Utilities">
+                            <option value="electricity">Electricity Bill</option>
+                            <option value="emi">EMI Payment</option>
+                            <option value="recharge">Recharge & Bill Payments</option>
+                            <option value="subscription">Subscription (Netflix/Spotify/etc)</option>
+                        </optgroup>
+
+                        <optgroup label="Food & Grocery">
+                            <option value="restaurant_cafe">Restaurant / Cafe</option>
+                            <option value="food_delivery">Food Delivery (Zomato/Swiggy/etc)</option>
+                            <option value="grocery">Grocery (Blinkit/Zepto/etc)</option>
+                        </optgroup>
+
+                        <optgroup label="Lifestyle">
+                            <option value="education">Education & Books</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="medical">Medical & Healthcare</option>
+                            <option value="personal_care">Personal Care</option>
+                            <option value="travel">Travel & Transport</option>
+                        </optgroup>
+
                         <optgroup label="Shopping">
                             <option value="amazon_purchase">Amazon Purchase</option>
                             <option value="flipkart_purchase">Flipkart Purchase</option>
                             <option value="myntra_purchase">Myntra Purchase</option>
-                            <option value="online_shopping">Other Online Shopping</option>
                             <option value="offline_shopping">Offline Shopping</option>
+                            <option value="online_shopping">Other Online Shopping</option>
                         </optgroup>
-                        <optgroup label="Food & Grocery">
-                            <option value="food_delivery">Food Delivery (Zomato/Swiggy)</option>
-                            <option value="grocery">Grocery (Blinkit/Zepto)</option>
-                            <option value="dining_out">Dining Out</option>
-                        </optgroup>
-                        <optgroup label="Bills & Utilities">
-                            <option value="recharge">Recharge & Bill Payments</option>
-                            <option value="emi">EMI Payment</option>
-                            <option value="rent">Rent</option>
-                            <option value="electricity">Electricity Bill</option>
-                            <option value="subscription">Subscription (Netflix/Spotify)</option>
-                        </optgroup>
-                        <optgroup label="Lifestyle">
-                            <option value="medical">Medical & Healthcare</option>
-                            <option value="travel">Travel & Transport</option>
-                            <option value="education">Education & Books</option>
-                            <option value="entertainment">Entertainment</option>
-                            <option value="personal_care">Personal Care</option>
-                        </optgroup>
+
                         <option value="others">Others</option>
                     </select>
                 </div>
+
                 <div class="txn-form-group" id="spentsCustomPurposeGroup">
                     <label for="spentsCustomPurpose">Specify Details</label>
                     <input type="text" id="spentsCustomPurpose" class="txn-input"
                         placeholder="e.g., Movie tickets, Zomato...">
                 </div>
+                
+                <div class="txn-form-group">
+                    <label for="spentsRemark">Remark (Optional)</label>
+                    <input type="text" id="spentsRemark" class="txn-input" placeholder="e.g., Note about this withdraw">
+                </div>
+
                 <div class="txn-form-group">
                     <label for="spentsBank">Mode of Payment</label>
                     <select id="spentsBank" class="txn-input" required>
@@ -531,8 +555,8 @@
                         required>
                 </div>
                 <div class="txn-form-group">
-                    <label for="quickTxnDescription">Description (Optional)</label>
-                    <input type="text" id="quickTxnDescription" class="txn-input"
+                    <label for="quickTxnRemark">Remark (Optional)</label>
+                    <input type="text" id="quickTxnRemark" class="txn-input"
                         placeholder="e.g., Salary, ATM Withdrawal...">
                 </div>
                 <div class="txn-actions">
@@ -576,8 +600,8 @@
                         min="0" required>
                 </div>
                 <div class="txn-form-group">
-                    <label for="customerAmountDescription">Description (Optional)</label>
-                    <input type="text" id="customerAmountDescription" class="txn-input"
+                    <label for="customerAmountRemark">Remark (Optional)</label>
+                    <input type="text" id="customerAmountRemark" class="txn-input"
                         placeholder="e.g., Loan, Payment...">
                 </div>
                 <div class="txn-form-group">

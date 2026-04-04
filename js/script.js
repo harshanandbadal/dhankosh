@@ -792,7 +792,7 @@ function renderTransactions() {
   if (query) {
     filtered = filtered.filter(txn => {
       const typeDisplay = txn.sign === '+' ? 'deposit' : 'withdraw';
-      const searchString = `${txn.id} ${txn.date} ${typeDisplay} ${txn.amount} ${txn.purpose} ${txn.account}`.toLowerCase();
+      const searchString = `${txn.id} ${txn.date} ${typeDisplay} ${txn.amount} ${txn.purpose} ${txn.remark || ''} ${txn.account}`.toLowerCase();
       return searchString.includes(query);
     });
   }
@@ -821,6 +821,7 @@ function renderTransactions() {
     const amountStr = (txn.sign === '+' ? '+ ' : '- ') + formatINR(txn.amount);
 
     // Determine transaction type: Deposit or Withdraw
+    // Determine transaction type: Deposit or Withdraw
     const txnTypeDisplay = txn.sign === '+' ? 'Deposit' : 'Withdraw';
     const typeClass = txn.type.toLowerCase().replace(/ /g, '_');
 
@@ -830,6 +831,7 @@ function renderTransactions() {
       <div class="txn-data-type ${typeClass}">${txnTypeDisplay}</div>
       <div class="txn-data-amount ${amountClass}">${amountStr}</div>
       <div class="txn-data-purpose" title="${escapeHtml(txn.purpose)}">${escapeHtml(txn.purpose)}</div>
+      <div class="txn-data-remark" title="${escapeHtml(txn.remark || '')}">${escapeHtml(txn.remark || '')}</div>
       <div class="txn-data-account">${escapeHtml(txn.account)}</div>
       <button class="txn-delete-btn" data-id="${txn.id}" title="Delete Transaction">🗑️ Delete</button>
     `;
@@ -1325,6 +1327,8 @@ function initAddPaymentsModal() {
     closeModal('txnModalOverlay');
     form.reset();
     if (customGroup) customGroup.classList.remove('visible');
+    const remarkInput = document.getElementById('txnRemark');
+    if (remarkInput) remarkInput.value = '';
     if (txnOriginSel) txnOriginSel.disabled = true;
   });
 
@@ -1334,6 +1338,8 @@ function initAddPaymentsModal() {
       closeModal('txnModalOverlay');
       form.reset();
       if (customGroup) customGroup.classList.remove('visible');
+      const remarkInput = document.getElementById('txnRemark');
+      if (remarkInput) remarkInput.value = '';
       if (txnOriginSel) txnOriginSel.disabled = true;
     }
   });
@@ -1365,16 +1371,19 @@ function initAddPaymentsModal() {
         if (optCredit) optCredit.style.display = '';
 
         // Filter based on selected purpose
-        if (val === 'billpayments') {
+        const bankOnlyPurposes = ['deposits', 'interest', 'salary', 'self_transfer'];
+        const creditOnlyPurposes = ['billpayments'];
+
+        if (creditOnlyPurposes.includes(val)) {
           // Bill Payments [Credit Lines] → Show only Credit Lines
           if (optLiquid) optLiquid.style.display = 'none';
           if (optCredit) optCredit.style.display = '';
-        } else if (val === 'deposit') {
-          // Deposit [Bank Accounts] → Show only Bank Accounts
+        } else if (bankOnlyPurposes.includes(val)) {
+          // Deposits/Interest/Salary/Self-Transfer [Bank Accounts] → Show only Bank Accounts
           if (optLiquid) optLiquid.style.display = '';
           if (optCredit) optCredit.style.display = 'none';
-        } else if (val === 'others') {
-          // Others → Show Bank Accounts, Credit Lines
+        } else {
+          // Cashback, Gifts & Allowances, Refunds, Others → Show both
           if (optLiquid) optLiquid.style.display = '';
           if (optCredit) optCredit.style.display = '';
         }
@@ -1391,6 +1400,7 @@ function initAddPaymentsModal() {
     const amount = parseFloat(document.getElementById('txnAmount').value);
     const purpose = purposeSel ? purposeSel.value : '';
     const custom = document.getElementById('txnCustomPurpose')?.value?.trim();
+    const remark = document.getElementById('txnRemark')?.value?.trim();
     const account = txnOriginSel ? txnOriginSel.value : '';
 
     if (!date || isNaN(amount) || amount <= 0 || !purpose || !account) {
@@ -1415,6 +1425,7 @@ function initAddPaymentsModal() {
       date,
       type: getTxnType(purpose),
       purpose: purposeLabel,
+      remark: remark || '',
       account: accountLabel,
       amount,
       sign: getTxnSign(purpose),
@@ -1424,7 +1435,8 @@ function initAddPaymentsModal() {
     saveState();
 
     renderAll();
-    addNotification(`${purposeLabel}: ${formatINR(amount)} - ${accountLabel}`);
+    const notifyLabel = remark ? `${purposeLabel} (${remark})` : purposeLabel;
+    addNotification(`${notifyLabel}: ${formatINR(amount)} - ${accountLabel}`);
     closeModal('txnModalOverlay');
     form.reset();
     if (customGroup) customGroup.classList.remove('visible');
@@ -1434,41 +1446,38 @@ function initAddPaymentsModal() {
 
 function applyPayment(purpose, account, amount) {
   switch (purpose) {
-    case 'deposit':
+    case 'deposits':
+    case 'interest':
+    case 'salary':
+    case 'self_transfer': {
       // Add money to a bank account
       const bank = state.banks.find(b => b.id === account);
       if (bank) {
         bank.balance += amount;
       }
       break;
+    }
 
     case 'billpayments':
       // Bill payment to credit card - transaction is recorded with '+' sign
       // Credit outstanding is calculated from transaction history
       break;
 
-
-    default:
-      // others — treat as inflow to the selected account
+    default: {
+      // cashback, gifts_allowances, refunds, others — treat as inflow to the selected account
       const otherBank = state.banks.find(b => b.id === account);
       if (otherBank) {
         otherBank.balance += amount;
       } else if (state.credit.find(c => c.id === account)) {
         // Credit outstanding is strictly history-based
-      } else if (state.credit[account] !== undefined) {
-        state.credit[account] += amount;
       }
+      break;
+    }
   }
 }
 
 function getTxnType(purpose) {
-  const map = {
-    billpayments: 'DEPOSIT',
-    deposit: 'DEPOSIT',
-
-    others: 'DEPOSIT',
-  };
-  return map[purpose] || 'DEPOSIT';
+  return 'DEPOSIT';
 }
 
 function getTxnSign(purpose) {
@@ -1478,8 +1487,13 @@ function getTxnSign(purpose) {
 function getPurposeLabel(purpose, custom) {
   const map = {
     billpayments: 'Bill Payment',
-    deposit: 'Deposit',
-
+    cashback: 'Cashback',
+    deposits: 'Deposit',
+    gifts_allowances: 'Gifts & Allowances',
+    interest: 'Interest',
+    refunds: 'Refund',
+    salary: 'Salary',
+    self_transfer: 'Self-Transfer',
     others: custom || 'Others',
   };
   return map[purpose] || purpose;
@@ -1509,6 +1523,8 @@ function initSpentsModal() {
     closeModal('spentsModalOverlay');
     form.reset();
     if (customGroup) customGroup.classList.remove('visible');
+    const remarkInput = document.getElementById('spentsRemark');
+    if (remarkInput) remarkInput.value = '';
   });
 
   if (overlay) overlay.addEventListener('click', e => {
@@ -1516,6 +1532,8 @@ function initSpentsModal() {
       closeModal('spentsModalOverlay');
       form.reset();
       if (customGroup) customGroup.classList.remove('visible');
+      const remarkInput = document.getElementById('spentsRemark');
+      if (remarkInput) remarkInput.value = '';
     }
   });
 
@@ -1538,6 +1556,7 @@ function initSpentsModal() {
     const amount = parseFloat(document.getElementById('spentsAmount').value);
     const category = detailsSel ? detailsSel.value : 'others';
     const custom = document.getElementById('spentsCustomPurpose')?.value?.trim();
+    const remark = document.getElementById('spentsRemark')?.value?.trim();
     const bankKey = document.getElementById('spentsBank').value;
 
     if (!date || isNaN(amount) || amount <= 0 || !bankKey || !category) {
@@ -1583,6 +1602,7 @@ function initSpentsModal() {
       date,
       type: 'WITHDRAWAL',
       purpose: categoryLabel,
+      remark: remark || '',
       account: bankLabel,
       amount,
       sign: '-',
@@ -1592,10 +1612,13 @@ function initSpentsModal() {
     saveState();
 
     renderAll();
-    addNotification(`Withdraw: ${formatINR(amount)} - ${bankLabel}`);
+    const notifyLabel = remark ? `${categoryLabel} (${remark})` : categoryLabel;
+    addNotification(`Withdraw: ${formatINR(amount)} - ${bankLabel} [${notifyLabel}]`);
     closeModal('spentsModalOverlay');
     form.reset();
     if (customGroup) customGroup.classList.remove('visible');
+    const remarkInput = document.getElementById('spentsRemark');
+    if (remarkInput) remarkInput.value = '';
   });
 }
 
@@ -1755,7 +1778,7 @@ function initCustomerAmountModals() {
 
       const date = document.getElementById('customerAmountDate').value;
       const amount = parseFloat(document.getElementById('customerAmountValue').value);
-      const description = document.getElementById('customerAmountDescription').value.trim();
+      const remark = document.getElementById('customerAmountRemark')?.value?.trim();
       const accountKey = document.getElementById('customerAmountAccount')?.value || '';
 
       if (!date) {
@@ -1781,7 +1804,8 @@ function initCustomerAmountModals() {
             id: generateId(),
             date: date,
             type: 'Deposit',
-            purpose: `You Gave - ${customer.name}${description ? ' - ' + description : ''}`,
+            purpose: 'You Gave',
+            remark: remark || '',
             account: customer.name,
             amount: amount,
             sign: '+',
@@ -1797,7 +1821,8 @@ function initCustomerAmountModals() {
               id: generateId(),
               date: date,
               type: 'WITHDRAWAL',
-              purpose: `You Gave - ${customer.name}${description ? ' - ' + description : ''}`,
+              purpose: 'You Gave',
+              remark: remark || '',
               account: accountLabel,
               amount: amount,
               sign: '-',
@@ -1805,7 +1830,8 @@ function initCustomerAmountModals() {
             });
           }
 
-          addNotification(`You Gave: ${formatINR(amount)} - ${customer.name}`);
+          const notifyLabel = remark ? `You Gave (${remark})` : 'You Gave';
+          addNotification(`${notifyLabel}: ${formatINR(amount)} - ${customer.name}`);
           if (accountKey) {
             addNotification(`Withdraw: ${formatINR(amount)} - ${accountLabel}`);
           }
@@ -1817,7 +1843,8 @@ function initCustomerAmountModals() {
             id: generateId(),
             date: date,
             type: 'Withdrawal',
-            purpose: `You Got - ${customer.name}${description ? ' - ' + description : ''}`,
+            purpose: 'You Got',
+            remark: remark || '',
             account: customer.name,
             amount: amount,
             sign: '-',
@@ -1833,7 +1860,8 @@ function initCustomerAmountModals() {
               id: generateId(),
               date: date,
               type: 'DEPOSIT',
-              purpose: `You Got - ${customer.name}${description ? ' - ' + description : ''}`,
+              purpose: 'You Got',
+              remark: remark || '',
               account: accountLabel,
               amount: amount,
               sign: '+',
@@ -1841,7 +1869,8 @@ function initCustomerAmountModals() {
             });
           }
 
-          addNotification(`You Got: ${formatINR(amount)} - ${customer.name}`);
+          const notifyLabel = remark ? `You Got (${remark})` : 'You Got';
+          addNotification(`${notifyLabel}: ${formatINR(amount)} - ${customer.name}`);
           if (accountKey) {
             addNotification(`Deposit: ${formatINR(amount)} - ${accountLabel}`);
           }
@@ -1963,6 +1992,14 @@ function initTransactionSearch() {
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       renderTransactions();
+    });
+  }
+
+  const printBtn = document.getElementById('txnPrintBtn');
+  if (printBtn) {
+    printBtn.addEventListener('click', () => {
+      const query = (searchInput && searchInput.value) ? searchInput.value.trim() : '';
+      window.open(`print.html?q=${encodeURIComponent(query)}`, '_blank');
     });
   }
 }
@@ -2302,7 +2339,7 @@ function initQuickTxnForm() {
 
     const date = document.getElementById('quickTxnDate').value;
     const amount = parseFloat(document.getElementById('quickTxnAmount').value);
-    const description = document.getElementById('quickTxnDescription')?.value?.trim();
+    const remark = document.getElementById('quickTxnRemark')?.value?.trim();
     const action = form.dataset.action;
     const bank = form.dataset.bank;
 
@@ -2312,11 +2349,7 @@ function initQuickTxnForm() {
     }
 
     // Determine the purpose and sign
-    let purpose = action === 'deposit' ? 'Quick Deposit' : 'Quick Withdrawal';
-    if (description) {
-      purpose += ` - ${description}`;
-    }
-
+    const purpose = action === 'deposit' ? 'Quick Deposit' : 'Quick Withdraw';
     const accountLabel = getAccountLabel(bank);
 
     // Apply state changes
@@ -2337,6 +2370,7 @@ function initQuickTxnForm() {
       date,
       type: action === 'deposit' ? 'DEPOSIT' : 'WITHDRAWAL',
       purpose: purpose,
+      remark: remark || '',
       account: accountLabel,
       amount,
       sign: action === 'deposit' ? '+' : '-',
@@ -2347,7 +2381,8 @@ function initQuickTxnForm() {
 
     saveState();
     renderAll();
-    addNotification(`${action === 'deposit' ? 'Deposit' : 'Withdraw'}: ${formatINR(amount)} - ${accountLabel}`);
+    const notifyLabel = remark ? `${purpose} (${remark})` : purpose;
+    addNotification(`${notifyLabel}: ${formatINR(amount)} - ${accountLabel}`);
     closeModal('quickTxnModalOverlay');
     form.reset();
   });

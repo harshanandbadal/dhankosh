@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!state || !state.transactions || state.transactions.length === 0) {
     setupOverlay.style.display = 'none';
     statementContent.style.display = 'block';
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">[ NO TRANSACTIONS FOUND IN LEDGER ]</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">[ NO TRANSACTIONS FOUND IN LEDGER ]</td></tr>';
     return;
   }
 
@@ -125,6 +125,79 @@ document.addEventListener('DOMContentLoaded', () => {
   setupOverlay.style.setProperty('display', 'flex', 'important');
   statementContent.style.setProperty('display', 'none', 'important');
 
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('q')) {
+    const query = urlParams.get('q').toLowerCase();
+    
+    setupOverlay.style.setProperty('display', 'none', 'important');
+    statementContent.style.setProperty('display', 'block', 'important');
+    
+    filterText.textContent = query ? `Search Query: "${urlParams.get('q')}"` : 'All Transactions';
+    
+    let filteredTrans = state.transactions;
+    if (query) {
+      filteredTrans = filteredTrans.filter(txn => {
+        const typeDisplay = txn.sign === '+' ? 'deposit' : 'withdraw';
+        const searchString = `${txn.id} ${txn.date} ${typeDisplay} ${txn.amount} ${txn.purpose} ${txn.remark || ''} ${txn.account}`.toLowerCase();
+        return searchString.includes(query);
+      });
+    }
+
+    if (filteredTrans.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">[ NO TRANSACTIONS MATCHING SEARCH ]</td></tr>';
+      return;
+    }
+
+    const chronological = [...filteredTrans].sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return (a._ts || 0) - (b._ts || 0);
+    });
+
+    let runningBalance = 0;
+    const withBalance = chronological.map(txn => {
+      const isDeposit = txn.sign === '+';
+      runningBalance += isDeposit ? txn.amount : -txn.amount;
+      return { ...txn, balance: runningBalance };
+    });
+
+    const sortedTrans = withBalance.reverse();
+
+    let totalD = 0;
+    let totalW = 0;
+
+    tbody.innerHTML = sortedTrans.map(txn => {
+      const isDeposit = txn.sign === '+';
+      const typeDisplay = isDeposit ? 'Deposit' : 'Withdraw';
+      const balClass = txn.balance >= 0 ? 'pos' : 'neg';
+      const balSign  = txn.balance >= 0 ? '' : '-';
+
+      if (isDeposit) totalD += txn.amount;
+      else totalW += txn.amount;
+
+      return `
+        <tr>
+          <td>${formatDateDisplay(txn.date)}</td>
+          <td style="font-family: monospace;">${txn.id.substring(0, 8)}</td>
+          <td>${typeDisplay}</td>
+          <td>${txn.purpose || '—'}</td>
+          <td>${txn.remark || '—'}</td>
+          <td>${txn.account || '—'}</td>
+          <td class="amount ${isDeposit ? 'pos' : 'neg'}">${isDeposit ? '+' : '-'} ${formatINR(txn.amount)}</td>
+          <td class="amount balance-col ${balClass}">${balSign}${formatINR(Math.abs(txn.balance))}</td>
+        </tr>
+      `;
+    }).join('');
+
+    document.getElementById('totalDeposits').textContent = '+ ' + formatINR(totalD);
+    document.getElementById('totalWithdrawals').textContent = '- ' + formatINR(totalW);
+
+    setTimeout(() => {
+      window.print();
+    }, 500);
+    
+    return;
+  }
+
   // Handle form submission
   setupForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -149,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (filteredTrans.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">[ NO TRANSACTIONS MATCHING FILTER ]</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">[ NO TRANSACTIONS MATCHING FILTER ]</td></tr>';
       return;
     }
 
@@ -188,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td style="font-family: monospace;">${txn.id.substring(0, 8)}</td>
           <td>${typeDisplay}</td>
           <td>${txn.purpose || '—'}</td>
+          <td>${txn.remark || '—'}</td>
           <td>${txn.account || '—'}</td>
           <td class="amount ${isDeposit ? 'pos' : 'neg'}">${isDeposit ? '+' : '-'} ${formatINR(txn.amount)}</td>
           <td class="amount balance-col ${balClass}">${balSign}${formatINR(Math.abs(txn.balance))}</td>

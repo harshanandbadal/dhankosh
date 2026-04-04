@@ -2209,12 +2209,13 @@ select.txn-input option {
 /* --- Transaction History Panel --- */
 .transactions-wrapper {
     width: 100%;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 .transactions-header {
     display: grid;
-    grid-template-columns: repeat(7, minmax(auto, 1fr));
+    grid-template-columns: 1fr 1fr 0.8fr 0.9fr 1.5fr 2fr 1fr 0.8fr;
+    min-width: 900px;
     gap: 1rem;
     padding: 0.8rem;
     background: rgba(0, 229, 255, 0.05);
@@ -2240,6 +2241,10 @@ select.txn-input option {
     text-align: left;
 }
 
+.txn-col-remark {
+    text-align: left;
+}
+
 .txn-col-account {
     text-align: left;
 }
@@ -2262,7 +2267,8 @@ select.txn-input option {
 
 .transaction-row {
     display: grid;
-    grid-template-columns: repeat(7, minmax(auto, 1fr));
+    grid-template-columns: 1fr 1fr 0.8fr 0.9fr 1.5fr 2fr 1fr 0.8fr;
+    min-width: 900px;
     gap: 1rem;
     padding: 0.8rem;
     border-left: 3px solid var(--accent-cyan);
@@ -2331,6 +2337,15 @@ select.txn-input option {
     overflow: hidden;
     text-overflow: ellipsis;
     /* On desktop we keep it nowrap for the table look, but on mobile we will override this */
+    white-space: nowrap;
+}
+
+.txn-data-remark {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -2593,7 +2608,7 @@ select.txn-input option {
     }
 
     .transaction-row {
-        grid-template-columns: repeat(7, minmax(80px, 1fr));
+        grid-template-columns: repeat(8, minmax(80px, 1fr));
         font-size: 0.8rem;
         gap: 0.5rem;
     }
@@ -2739,42 +2754,36 @@ select.txn-input option {
         overflow-x: auto;
     }
 
-    .transactions-header,
-    .transactions-list {
-        /* Remove hardcoded min-width that forces zooming out */
-        min-width: 100%;
-    }
-
-    .transactions-header,
-    .transaction-row {
-        /* Adjusted grid for mobile: 
-           Date, ID (hidden), Type, Amount, Purpose (flexible), Account (hidden), Action */
-        display: grid;
-        grid-template-columns: 85px 75px 85px 1fr 80px;
-        font-size: 0.75rem;
-        gap: 0.4rem;
-        padding: 0.6rem;
-    }
-
-    .txn-col-id,
-    .txn-data-id,
-    .txn-col-account,
-    .txn-data-account {
+    /* Mobile Card Layout for Txns */
+    .transactions-header {
         display: none;
     }
-
-    .txn-data-purpose {
-        white-space: normal;
-        /* Allow purpose to wrap on mobile */
-        word-break: break-word;
-        padding-right: 0.5rem;
+    
+    .transaction-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        min-width: 100%;
+        margin-bottom: 0.8rem;
+        gap: 0;
+        padding: 0.8rem;
+        border-left: 3px solid var(--accent-cyan);
+        background: rgba(0, 229, 255, 0.03);
     }
-
-    .txn-delete-btn {
-        padding: 0.35rem 0.6rem;
-        font-size: 0.7rem;
-        margin-left: 0.5rem;
-    }
+    
+    .txn-data-date { width: 50%; font-size: 0.75rem; color: var(--text-muted); }
+    .txn-data-id { width: 50%; text-align: right; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); opacity: 0.8; }
+    
+    .txn-data-type { width: 40%; font-size: 0.8rem; font-weight: bold; margin-top: 0.4rem; }
+    .txn-data-amount { width: 60%; text-align: right; font-size: 0.9rem; font-weight: 700; margin-top: 0.4rem; }
+    
+    .txn-data-account { width: 100%; font-size: 0.75rem; color: var(--accent-gold); margin-top: 0.4rem; }
+    
+    .txn-data-purpose { width: 100%; font-size: 0.8rem; margin-top: 0.4rem; white-space: normal; word-break: break-word; color: var(--text-bright); }
+    .txn-data-remark { width: 100%; font-size: 0.75rem; font-style: italic; color: var(--text-muted); margin-top: 0.2rem; white-space: normal; word-break: break-word; }
+    
+    .txn-delete-btn { margin-left: auto; margin-top: 0.5rem; width: auto; font-size: 0.7rem; padding: 0.4rem 0.8rem; }
 
 
     /* Budget stats */
@@ -2912,60 +2921,7 @@ select.txn-input option {
         font-size: 0.85rem;
     }
 
-    /* Transaction table — card-style on very small screens */
-    .transactions-header {
-        display: none;
-    }
-
-    .transactions-wrapper {
-        overflow-x: visible;
-    }
-
-    .transactions-list {
-        min-width: 0;
-    }
-
-    .transaction-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.3rem 1rem;
-        padding: 0.75rem;
-        border-left: 3px solid var(--accent-cyan);
-        margin-bottom: 0.5rem;
-    }
-
-    .txn-data-date {
-        width: 100%;
-        font-size: 0.7rem;
-    }
-
-    .txn-data-id {
-        display: none;
-    }
-
-    .txn-data-type {
-        font-size: 0.75rem;
-    }
-
-    .txn-data-amount {
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-
-    .txn-data-purpose {
-        width: 100%;
-        font-size: 0.75rem;
-    }
-
-    .txn-data-account {
-        font-size: 0.72rem;
-    }
-
-    .txn-delete-btn {
-        margin-left: auto;
-        padding: 0.3rem 0.5rem;
-        font-size: 0.68rem;
-    }
+    /* Inherits card styles seamlessly from max-width 768px */
 
     /* Modals */
     .txn-modal,
